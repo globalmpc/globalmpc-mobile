@@ -1,0 +1,192 @@
+// GENERATED-STRUCTURE, HAND-TRANSLATED CONTENT.
+// English translations for the MPC app.
+// Source of truth. All other languages fall back to these keys.
+// Keys must stay in sync with en.dart (the source of truth).
+
+const Map<String, String> enStrings = {
+  'app.category': 'Mining RWA infrastructure',
+  'app.tagline':
+      'Real mining assets, made investable on-chain. Starting with Mongolia.',
+  'app.trust': 'Honesty itself is trust capital.',
+
+  'nav.home': 'Home',
+  'nav.projects': 'Projects',
+  'nav.earn': 'Earn',
+  'nav.wallet': 'Wallet',
+  'stage.inDiscussion': 'In discussion',
+  'stage.secured': 'Secured',
+  'stage.toBeSecured': 'To be secured',
+  'stage.comingSoon': 'Coming soon',
+  'status.secured': 'Secured',
+  'status.inProgress': 'In progress',
+  'status.inDiscussion': 'In discussion',
+  'status.planned': 'Planned',
+  'status.atIssuance': 'Commissioned at issuance',
+  'status.toBeCommissioned': 'To be commissioned',
+  'status.designStage': 'Design stage',
+  'status.afterOperations': 'Commissioned once operations begin',
+  'status.provisional': 'Provisionally selected',
+  'geo.mongolia': 'Mongolia',
+  'commodity.silicon': 'Silicon',
+  'commodity.lithium': 'Lithium',
+  'commodity.rareEarth': 'Rare earth elements',
+  'commodity.tba': 'To be announced',
+  'proj.tsagaan.name': 'Tsagaan Tolgoi Strategic Minerals',
+  'proj.tsagaan.summary':
+      'First reference asset in the MPC pipeline. Development, production and supply leadership under discussion.',
+  'proj.tsagaan.desc':
+      'The first reference case for the MPC issuance standard. Development, production and supply leadership are under discussion, with offtake structuring and independent operational audit to be commissioned ahead of on-chain issuance. Resource quantity and grade are not published until confirmed by an independent Competent Person signed report.',
+  'proj.additional.name': 'Additional Strategic Resources',
+  'proj.additional.summary': 'In discussion. Details to be announced.',
+  'proj.additional.desc':
+      'A further strategic resource is in discussion. MPC will publish structuring and verification detail as the asset advances, following the same repeatable, auditable issuance standard.',
+
+  'facts.tagline':
+      'Translating Mongolian mining resources into the language of global capital markets.',
+  'facts.disclosure':
+      'Quarterly operational reporting with on-chain disclosure.',
+  'facts.plannedStandard': 'ERC-3643 · planned',
+  'scope.offChain': 'Off-chain',
+  'scope.onChain': 'On-chain',
+  'layer.resource.title': 'Resource Layer',
+  'layer.resource.detail':
+      'Exploration, due diligence, offtake structuring, and operations partnerships.',
+  'layer.structuring.title': 'Structuring Layer',
+  'layer.structuring.detail':
+      'Cash-flow modelling, risk waterfall, and local compliance.',
+  'layer.tokenization.title': 'Tokenization Layer',
+  'layer.tokenization.detail': 'RWA issuance, registry, and oracle reporting.',
+  'layer.capital.title': 'Capital Markets Layer',
+  'layer.capital.detail':
+      'Custody, OTC / exchange trading, and secondary liquidity.',
+  'risk.resource.title': 'Resource risk',
+  'risk.resource.detail': 'Independent reserve assessment (planned).',
+  'risk.operational.title': 'Operational risk',
+  'risk.operational.detail': 'SLA-based operational controls (design).',
+  'risk.market.title': 'Market risk',
+  'risk.market.detail': 'Commodity hedging mechanisms (planned).',
+  'risk.regulatory.title': 'Regulatory risk',
+  'risk.regulatory.detail': 'KYC / AML standards applied in advance (planned).',
+  'partner.audit': 'Operational audit',
+  'partner.tokenization': 'Tokenization (ERC-3643)',
+  'partner.oracle': 'Oracle reporting',
+  'verify.jorc': 'JORC physical verification',
+  'verify.cctv': 'CCTV + AI digital verification',
+  'verify.cp': 'Independent Competent Person report (JORC / NI 43-101)',
+  'tx.receive': 'Received',
+  'tx.send': 'Sent',
+  'tx.allocation': 'Project allocation',
+  'tx.issuance': 'Issuance',
+  'wallet.tx.vault': 'Tsagaan Tolgoi vault',
+
+  'common.retry': 'Retry',
+  'common.viewAll': 'View all',
+  'common.pending': 'Pending',
+  'common.comingSoon': 'Coming soon',
+
+  'onboard.enter': 'Enter',
+  'onboard.b1.title': 'Real mining assets',
+  'onboard.b1.body':
+      'Browse Mongolian mining projects and their issuance progress.',
+  'onboard.b2.title': 'Auditable by design',
+  'onboard.b2.body': 'Physical checks plus on-chain disclosure.',
+  'onboard.b3.title': 'Track your MPC',
+  'onboard.b3.body':
+      'Balance and history, with proof for every claim. Total supply 10B.',
+
+  'dash.balance': 'Est. Total Value (MPC)',
+  'dash.addFunds': 'Deposit',
+  'dash.demo': 'Demo',
+  'dash.testnet': 'Testnet',
+  'dash.utilityToken': 'Utility token',
+  'dash.totalSupply': 'Total supply',
+  'dash.network': 'Network',
+  'dash.listing': 'Listing',
+  'dash.issuer': 'Issuer',
+  'dash.contract': 'Contract',
+  'dash.explorer': 'Explorer',
+  'tour.balance.title': 'Your balance',
+  'tour.balance.body': 'Track your MPC here. Tap the eye to hide the amount.',
+  'tour.actions.title': 'Quick actions',
+  'tour.actions.body': 'Jump to projects, earn, wallet, or the block explorer.',
+  'tour.projects.title': 'Mining projects',
+  'tour.projects.body':
+      'Browse tokenized Mongolian mining assets and their status.',
+  'tour.settings.title': 'Language & settings',
+  'tour.settings.body':
+      'Tap the gear to open Settings, where you can change the app language, theme, and your profile.',
+  'dash.projects': 'Mining projects',
+  'dash.howItWorks': 'How MPC works',
+
+  'proj.title': 'Mining projects',
+  'proj.none': 'No projects yet',
+  'proj.loadError': 'Could not load projects',
+  'proj.unavailable': 'Projects unavailable',
+  'proj.readiness': 'Issuance readiness',
+  'proj.pipeline': 'Pipeline',
+  'proj.allocated': 'MPC allocated',
+  'proj.productionTrend': 'Indicative production trend',
+  'proj.verification': 'Verification',
+  'proj.governance': 'Governance & risk',
+  'proj.partners': 'Verification network',
+  'proj.orchestrationNote':
+      'MPC commissions these firms per deal rather than employing them. Status reflects where each stands today.',
+  'proj.contract': 'Contract',
+  'proj.tokenStandard': 'Planned issuance standard',
+  'proj.overall': 'Overall',
+  'proj.allocatedSupply': 'Allocated supply',
+  'proj.hold': 'Hold this asset',
+  'proj.notOpen': 'Not yet open',
+  'proj.viewExplorer': 'View on block explorer',
+  'proj.notFound': 'Project not found',
+  'proj.betaHold': 'Holding flow is not part of this beta yet.',
+
+  'wallet.title': 'Wallet',
+  'wallet.totalBalance': 'Total balance',
+  'wallet.demoNotice':
+      'Demo wallet — no real keys are generated or stored in this beta.',
+  'wallet.allocations': 'Allocations',
+  'wallet.activity': 'Activity',
+  'wallet.receive': 'Receive',
+  'wallet.send': 'Send',
+  'wallet.unallocated': 'Unallocated',
+  'wallet.noAllocations': 'No allocations yet',
+  'wallet.noAllocationsBody':
+      'Hold MPC against a live mining project to see it here.',
+  'wallet.unavailable': 'Wallet unavailable',
+  'wallet.addressCopied': 'Address copied',
+  'wallet.transfersLater': 'Transfers land in a later milestone.',
+
+  'earn.title': 'Earn',
+  'earn.gatedBanner':
+      'Earn is not live yet. Staking and farming open only after listing and identity verification (KYC). No rate exists to show today.',
+  'earn.status.planned': 'Planned',
+  'earn.rateLabel': 'Reward rate',
+  'earn.ratePending': 'Announced at listing',
+  'earn.notify': 'Notify me',
+  'earn.notifyToast': "We'll let you know when Earn opens.",
+  'earn.staking.title': 'Staking',
+  'earn.staking.body':
+      'Lock MPC to back mining-asset issuance. Reward terms are published when the program opens at listing.',
+  'earn.farming.title': 'Farming',
+  'earn.farming.body':
+      'Provide MPC liquidity once the token lists, and earn from trading activity. Terms are published at listing.',
+  'earn.whyGated': 'Why not yet?',
+  'earn.gate.kyc.title': 'Identity verification (KYC)',
+  'earn.gate.kyc.body':
+      'MPC issuance is designed on ERC-3643, a permissioned standard, so earning will require a verified identity.',
+  'earn.gate.listing.title': 'Public listing',
+  'earn.gate.listing.body':
+      'Reward rates and pools are set when MPC lists. No rate is shown before then.',
+
+  'settings.title': 'Settings',
+  'settings.profile': 'Profile',
+  'settings.language': 'Language',
+  'settings.appearance': 'Appearance',
+  'theme.system': 'System',
+  'theme.light': 'Light',
+  'theme.dark': 'Dark',
+  'profile.title': 'Profile',
+  'profile.details': 'Account details',
+  'profile.walletAddress': 'Address',
+};

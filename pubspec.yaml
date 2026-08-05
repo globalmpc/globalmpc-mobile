@@ -1,0 +1,79 @@
+name: mpc_mining_app
+description: "MPC — Mongolian mining RWA app. Browse tokenized mining projects, hold MPC, track your position."
+publish_to: 'none'
+version: 0.1.0+3
+
+environment:
+  sdk: ^3.11.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # Required even though no screen uses Cupertino directly: go_router and
+  # webview_flutter import package:flutter/cupertino.dart, which references the
+  # CupertinoIcons font. Removing it makes release builds warn about a missing
+  # font family. It tree-shakes to a few KB, so the cost is negligible.
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.2
+  go_router: ^14.6.2
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.10+1
+  webview_flutter: ^4.10.0
+  showcaseview: ^3.0.0
+  intl: ^0.20.2
+  shared_preferences: ^2.3.2
+  flutter_secure_storage: ^10.3.1
+  local_auth: ^3.0.2
+  qr_flutter: ^4.1.0
+  share_plus: ^13.3.0
+  # Wallet key lifecycle — exact pins (spec S7 supply-chain rule).
+  # bip39 / web3dart are pinned to production-trusted versions; bip32 adds
+  # the on-device HD derivation.
+  bip39: 1.0.6
+  bip32: 2.0.0
+  web3dart: 2.7.3
+  http: 1.2.2
+  # PBKDF2 for the device PIN. Already in the tree via web3dart; declared
+  # explicitly because we import it directly, and pinned for the same reason.
+  pointycastle: 3.9.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/brand/
+    - assets/icons/auth/
+    - assets/icons/bottom-nav/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk-Variable.ttf
+    - family: GothicA1
+      fonts:
+        - asset: assets/fonts/GothicA1-Regular.ttf
+        - asset: assets/fonts/GothicA1-Bold.ttf
+          weight: 700
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Variable.ttf
+
+# App launcher icon (run: dart run flutter_launcher_icons)
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "icon/app_icon.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true
+  background_color_ios: "#0C0A09"
+  adaptive_icon_background: "#0C0A09"
+  adaptive_icon_foreground: "icon/app_icon_foreground.png"

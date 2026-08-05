@@ -1,0 +1,17 @@
+# Copy to android/key.properties and fill in. That file and the keystore it
+# points at are gitignored and must never be committed: whoever holds them can
+# publish an update that replaces the app on every user's device.
+#
+# Generate a keystore (once, then back it up somewhere durable — losing it
+# means you can never update the app on Play again):
+#
+#   keytool -genkey -v -keystore ~/mpc-upload-keystore.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#
+# storeFile is resolved relative to android/app/, so prefer an absolute path
+# outside the repository.
+
+storeFile=/absolute/path/to/mpc-upload-keystore.jks
+storePassword=
+keyAlias=upload
+keyPassword=
