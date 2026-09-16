@@ -3,8 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/app_colors.dart';
 
-/// The MPC faceted-crystal mark (assets/brand/logo.svg, copper #C2773F).
-/// [tint] recolors the mark; leave null to keep the brand copper.
 class MpcLogo extends StatelessWidget {
   const MpcLogo({super.key, this.size = 40, this.tint});
 
@@ -24,7 +22,6 @@ class MpcLogo extends StatelessWidget {
   }
 }
 
-/// Logo inside the brand gold-gradient tile, used on onboarding and headers.
 class MpcLogoTile extends StatelessWidget {
   const MpcLogoTile({super.key, this.size = 44, this.radius = 13});
 

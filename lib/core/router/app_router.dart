@@ -13,19 +13,15 @@ import '../../features/projects/projects_screen.dart';
 import '../../features/settings/profile_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/shell/home_shell.dart';
-import '../../features/wallet/wallet_entry_flow_screen.dart';
-import '../../features/wallet/wallet_transfer_screens.dart';
+import '../../features/entry/entry_flow_screen.dart';
+import '../../features/transactions/transaction_list_screen.dart';
+import '../../features/transfer/receive_screen.dart';
+import '../../features/transfer/send_screen.dart';
+import '../../features/transfer/transaction_detail_screen.dart';
 import '../../features/wallet/wallet_screen.dart';
 import '../../features/web/web_view_screen.dart';
 import '../../data/models/wallet_models.dart';
 
-/// Central route table.
-///
-/// There is no account system: the app keeps no personal data and identity is
-/// the wallet address. The one gate is the wallet lock — once a wallet exists,
-/// every surface that can see balances, history or the recovery phrase sits
-/// behind [WalletLockController], so backgrounding the app for longer than the
-/// lock timeout sends the user back to `/unlock`.
 class AppRouter {
   const AppRouter._();
 
@@ -35,13 +31,6 @@ class AppRouter {
     defaultValue: '/splash',
   );
 
-  /// Routes reachable while a wallet is locked.
-  ///
-  /// `/unlock` is the destination itself; `/splash` runs before the lock state
-  /// is known; the onboarding and create/import flows are how a user with no
-  /// wallet — or one restoring from their phrase after forgetting the PIN —
-  /// gets in at all. Importing cannot expose the existing wallet: it replaces
-  /// it, and only with a phrase the user already holds.
   static const Set<String> unlockExemptRoutes = {
     '/splash',
     '/unlock',
@@ -50,18 +39,12 @@ class AppRouter {
     '/wallet/import',
   };
 
-  /// Resolves where a navigation should actually land given [lock].
-  ///
-  /// Split out from [create] so the guard is testable without pumping a
-  /// widget tree.
   static String? redirectFor(WalletLockController lock, String location) {
     if (!lock.requiresUnlock) return null;
     if (unlockExemptRoutes.contains(location)) return null;
     return '/unlock';
   }
 
-  /// [lock] is optional: without it the router has no guard at all, which is
-  /// what widget tests that drive a single screen directly rely on.
   static GoRouter create({
     String? initialLocation,
     WalletLockController? lock,
@@ -89,8 +72,10 @@ class AppRouter {
         GoRoute(
           path: '/wallet/import',
           parentNavigatorKey: _rootKey,
-          builder: (_, __) =>
-              const WalletEntryFlowScreen(mode: WalletEntryMode.import),
+          builder: (_, state) => WalletEntryFlowScreen(
+            mode: WalletEntryMode.import,
+            isRestore: (state.extra as Map?)?['isRestore'] == true,
+          ),
         ),
         GoRoute(
           path: '/wallet/receive',
@@ -115,6 +100,11 @@ class AppRouter {
           ),
         ),
         GoRoute(
+          path: '/wallet/transactions',
+          parentNavigatorKey: _rootKey,
+          builder: (_, __) => const TransactionListScreen(),
+        ),
+        GoRoute(
           path: '/notifications',
           parentNavigatorKey: _rootKey,
           builder: (_, __) => const NotificationsScreen(),
@@ -130,29 +120,19 @@ class AppRouter {
           builder: (_, __) => const SecuritySettingsScreen(),
         ),
         GoRoute(
-          path: '/settings/notifications',
-          parentNavigatorKey: _rootKey,
-          builder: (_, __) => const NotificationSettingsScreen(),
-        ),
-        GoRoute(
-          path: '/settings/privacy',
-          parentNavigatorKey: _rootKey,
-          builder: (_, __) => const PrivacySettingsScreen(),
-        ),
-        GoRoute(
           path: '/settings/support',
           parentNavigatorKey: _rootKey,
           builder: (_, __) => const SupportSettingsScreen(),
         ),
         GoRoute(
-          path: '/settings/audit-status',
-          parentNavigatorKey: _rootKey,
-          builder: (_, __) => const AuditStatusScreen(),
-        ),
-        GoRoute(
           path: '/settings/network',
           parentNavigatorKey: _rootKey,
           builder: (_, __) => const NetworkSettingsScreen(),
+        ),
+        GoRoute(
+          path: '/settings/notifications',
+          parentNavigatorKey: _rootKey,
+          builder: (_, __) => const NotificationsSettingsScreen(),
         ),
         GoRoute(
           path: '/settings/recovery',
@@ -168,6 +148,11 @@ class AppRouter {
           path: '/settings/recovery/verify',
           parentNavigatorKey: _rootKey,
           builder: (_, __) => const VerifyBackupScreen(),
+        ),
+        GoRoute(
+          path: '/settings/recovery/verified',
+          parentNavigatorKey: _rootKey,
+          builder: (_, __) => const BackupVerifiedScreen(),
         ),
         GoRoute(
           path: '/settings/change-pin',

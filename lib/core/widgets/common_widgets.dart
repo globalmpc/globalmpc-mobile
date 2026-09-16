@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mpc_mining_app/core/theme/app_icons.dart';
 
 import '../localization/locale_controller.dart';
 import '../theme/app_colors.dart';
 
-/// Small, reusable presentational pieces shared across features.
-
 class MpcBackButton extends StatelessWidget {
-  const MpcBackButton({super.key, this.fallbackRoute, this.onPressedOverride});
+  const MpcBackButton({
+    super.key,
+    this.fallbackRoute,
+    this.onPressedOverride,
+    this.iconAsset,
+    this.iconSize = 18,
+  });
 
   final String? fallbackRoute;
   final VoidCallback? onPressedOverride;
+
+  final String? iconAsset;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -28,16 +36,20 @@ class MpcBackButton extends StatelessWidget {
           context.go(fallbackRoute!);
         }
       },
-      icon: const Icon(AppIcons.back, size: 20),
+      icon: iconAsset == null
+          ? const Icon(AppIcons.back, size: 20)
+          : SvgPicture.asset(iconAsset!, width: iconSize, height: iconSize),
     );
   }
 }
 
 class SectionHeader extends StatelessWidget {
-  const SectionHeader(this.title, {super.key, this.action});
+  const SectionHeader(this.title, {super.key, this.action, this.fontSize = 17});
 
   final String title;
   final Widget? action;
+
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +60,9 @@ class SectionHeader extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              fontSize: 17,
+              fontSize: fontSize,
               letterSpacing: -0.2,
-              height: 1.2,
+              height: fontSize == 18 ? 22 / 18 : 21 / 17,
             ),
           ),
         ),
@@ -61,20 +73,33 @@ class SectionHeader extends StatelessWidget {
 }
 
 class Pill extends StatelessWidget {
-  const Pill(this.label, {super.key, this.color, this.icon});
+  const Pill(
+    this.label, {
+    super.key,
+    this.color,
+    this.icon,
+    this.backgroundColor,
+    this.padding,
+    this.fontSize = 11,
+  });
 
   final String label;
   final Color? color;
   final IconData? icon;
+
+  final Color? backgroundColor;
+  final EdgeInsetsGeometry? padding;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
     final c = color ?? p.textLo;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: c.withValues(alpha: 0.10),
+        color: backgroundColor ?? c.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -88,7 +113,7 @@ class Pill extends StatelessWidget {
             label,
             style: TextStyle(
               color: c,
-              fontSize: 11,
+              fontSize: fontSize,
               fontWeight: FontWeight.w600,
               height: 1,
             ),
@@ -99,7 +124,6 @@ class Pill extends StatelessWidget {
   }
 }
 
-/// Labelled progress line used for the four-layer readiness bars.
 class LabeledProgress extends StatelessWidget {
   const LabeledProgress({
     super.key,
@@ -110,7 +134,7 @@ class LabeledProgress extends StatelessWidget {
   });
 
   final String label;
-  final double value; // 0..1
+  final double value;
   final String? trailing;
   final Color? color;
 
@@ -161,39 +185,51 @@ class StateMessage extends StatelessWidget {
     required this.title,
     this.message,
     this.onRetry,
+    this.iconWidget,
+    this.contentWidth,
   });
 
   final IconData icon;
   final String title;
   final String? message;
   final VoidCallback? onRetry;
+  final Widget? iconWidget;
+  final double? contentWidth;
 
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
+    final textColumn = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        if (message != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            message!,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: p.textLo),
+          ),
+        ],
+      ],
+    );
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 40, color: p.textLo),
+            iconWidget ?? Icon(icon, size: 40, color: p.textLo),
             const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            if (message != null) ...[
-              const SizedBox(height: 6),
-              Text(
-                message!,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: p.textLo),
-              ),
-            ],
+            contentWidth == null
+                ? textColumn
+                : SizedBox(width: contentWidth, child: textColumn),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
               OutlinedButton.icon(

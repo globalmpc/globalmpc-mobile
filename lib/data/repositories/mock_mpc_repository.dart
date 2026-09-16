@@ -56,7 +56,7 @@ class MockMpcRepository implements MpcRepository {
       nameKey: 'proj.additional.name',
       location: 'geo.mongolia',
       commodities: ['commodity.tba'],
-      stage: ProjectStage.toBeSecured,
+      stage: ProjectStage.comingSoon,
       summaryKey: 'proj.additional.summary',
       description: 'proj.additional.desc',
       pipeline: [

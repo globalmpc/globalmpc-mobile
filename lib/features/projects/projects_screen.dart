@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mpc_mining_app/core/theme/app_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/localization/locale_controller.dart';
-import '../../core/widgets/common_widgets.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/widgets/retry_state_card.dart';
 import '../../data/models/mining_project.dart';
 import 'projects_provider.dart';
 import 'widgets/project_card.dart';
@@ -16,29 +16,24 @@ class ProjectsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<ProjectsProvider>();
     final state = provider.state;
+    final p = context.palette;
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.tr('proj.title'))),
+      backgroundColor: p.bg,
       body: SafeArea(
-        top: false,
         child: RefreshIndicator(
+          color: AppColors.gold,
           onRefresh: provider.load,
-          child: switch (state.status) {
-            _ when state.isLoading => const Center(
-              child: CircularProgressIndicator(),
+          child: switch (state) {
+            _ when state.isLoading => _LoadingBody(),
+            _ when state.isError => _ErrorBody(onRetry: provider.load),
+            _ when (state.data?.isEmpty ?? false) => _EmptyBody(
+              onRetry: provider.load,
             ),
-            _ when state.isError => ListView(
-              children: [
-                const SizedBox(height: 120),
-                StateMessage(
-                  icon: AppIcons.cloud_off_outlined,
-                  title: context.tr('proj.loadError'),
-                  message: state.error,
-                  onRetry: provider.load,
-                ),
-              ],
+            _ => _LoadedBody(
+              projects: state.data ?? const [],
+              onTap: (p) => context.push('/projects/${p.id}'),
             ),
-            _ => _ProjectList(projects: state.data ?? const []),
           },
         ),
       ),
@@ -46,34 +41,174 @@ class ProjectsScreen extends StatelessWidget {
   }
 }
 
-class _ProjectList extends StatelessWidget {
-  const _ProjectList({required this.projects});
-  final List<MiningProject> projects;
+class _ScreenHeader extends StatelessWidget {
+  const _ScreenHeader({this.showSubtitle = true});
+  final bool showSubtitle;
 
   @override
   Widget build(BuildContext context) {
-    if (projects.isEmpty) {
-      return ListView(
-        children: [
-          const SizedBox(height: 120),
-          StateMessage(
-            icon: AppIcons.inbox_outlined,
-            title: context.tr('proj.none'),
+    final p = context.palette;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.tr('proj.title'),
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: p.textHi,
+            height: 29 / 24,
+          ),
+        ),
+        if (showSubtitle) ...[
+          const SizedBox(height: 16),
+          Text(
+            context.tr('proj.subtitle'),
+            style: TextStyle(fontSize: 13, color: p.textLo, height: 16 / 13),
           ),
         ],
-      );
-    }
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-      itemCount: projects.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 14),
-      itemBuilder: (context, i) {
-        final project = projects[i];
-        return ProjectCard(
-          project: project,
-          onTap: () => context.push('/projects/${project.id}'),
-        );
-      },
+      ],
+    );
+  }
+}
+
+class _LoadedBody extends StatelessWidget {
+  const _LoadedBody({required this.projects, required this.onTap});
+  final List<MiningProject> projects;
+  final ValueChanged<MiningProject> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+      children: [
+        const _ScreenHeader(),
+        const SizedBox(height: 16),
+        for (int i = 0; i < projects.length; i++) ...[
+          ProjectCard(project: projects[i], onTap: () => onTap(projects[i])),
+          if (i < projects.length - 1) const SizedBox(height: 16),
+        ],
+      ],
+    );
+  }
+}
+
+class _LoadingBody extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final p = context.palette;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+      children: [
+        const _ScreenHeader(),
+        const SizedBox(height: 16),
+
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: p.surface,
+            border: Border.all(color: p.border),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                width: 36,
+                height: 36,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  color: AppColors.gold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                context.tr('proj.loadingTitle'),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: p.textHi,
+                  height: 22 / 18,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                context.tr('proj.loadingBody'),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: p.textLo,
+                  height: 16 / 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        Container(
+          height: 180,
+          decoration: BoxDecoration(
+            color: p.surface,
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          height: 180,
+          decoration: BoxDecoration(
+            color: p.surface,
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ErrorBody extends StatelessWidget {
+  const _ErrorBody({required this.onRetry});
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+      children: [
+        const _ScreenHeader(showSubtitle: false),
+        const SizedBox(height: 40),
+        RetryStateCard(
+          iconAsset: 'assets/icons/notifications/cloud_off.svg',
+          iconSize: 36,
+          title: context.tr('proj.loadError'),
+          body: context.tr('proj.loadErrorBody'),
+          onRetry: onRetry,
+          buttonLabel: context.tr('proj.tryAgain'),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyBody extends StatelessWidget {
+  const _EmptyBody({required this.onRetry});
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+      children: [
+        const _ScreenHeader(showSubtitle: false),
+        const SizedBox(height: 40),
+        RetryStateCard(
+          iconAsset: 'assets/icons/notifications/inbox.svg',
+          iconSize: 40,
+          title: context.tr('proj.none'),
+          body: context.tr('proj.noneBody'),
+          onRetry: onRetry,
+          buttonLabel: context.tr('proj.tryAgain'),
+        ),
+      ],
     );
   }
 }
