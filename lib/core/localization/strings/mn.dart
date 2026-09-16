@@ -1,9 +1,6 @@
-// GENERATED-STRUCTURE, HAND-TRANSLATED CONTENT.
-// Mongolian (Монгол) translations for the MPC app.
-// Best-effort first pass — should be reviewed by a native speaker before release.
-// Keys must stay in sync with en.dart (the source of truth).
+import 'mn_screens.dart';
 
-const Map<String, String> mnStrings = {
+final Map<String, String> mnStrings = {
   'app.category': 'Уул уурхайн RWA дэд бүтэц',
   'app.tagline':
       'Бодит уул уурхайн хөрөнгийг онлайнаар хөрөнгө оруулах боломжтой болгоно. Монголоос эхэлж байна.',
@@ -50,14 +47,18 @@ const Map<String, String> mnStrings = {
   'layer.resource.title': 'Нөөцийн давхарга',
   'layer.resource.detail':
       'Хайгуул, due diligence, оффтэйк бүтэц, үйл ажиллагааны түншлэл.',
+  'layer.resource.brief': 'Хайгуул, due diligence',
   'layer.structuring.title': 'Бүтцийн давхарга',
   'layer.structuring.detail':
       'Мөнгөн урсгалын загвар, эрсдэлийн усан хүрхрээ, орон нутгийн нийцэл.',
+  'layer.structuring.brief': 'Мөнгөн урсгал ба нийцлийн загвар',
   'layer.tokenization.title': 'Токенжуулалтын давхарга',
   'layer.tokenization.detail': 'RWA гаргалт, бүртгэл, оракл тайлан.',
   'layer.capital.title': 'Капиталын зах зээлийн давхарга',
   'layer.capital.detail':
       'Хадгалалт, OTC / биржийн арилжаа, хоёрдогч хөрвөх чадвар.',
+  'layer.tokenization.brief': 'Гаргалт, бүртгэл, оракл',
+  'layer.capital.brief': 'Бүртгэл ба хоёрдогч хөрвөх чадвар',
   'risk.resource.title': 'Нөөцийн эрсдэл',
   'risk.resource.detail': 'Бие даасан нөөцийн үнэлгээ (төлөвлөсөн).',
   'risk.operational.title': 'Үйл ажиллагааны эрсдэл',
@@ -69,8 +70,11 @@ const Map<String, String> mnStrings = {
   'risk.regulatory.detail':
       'KYC / AML стандартыг урьдчилан хэрэглэнэ (төлөвлөсөн).',
   'partner.audit': 'Үйл ажиллагааны аудит',
+  'partner.audit.detail': 'Хэлцэл тус бүрээр даалгадаг',
   'partner.tokenization': 'Токенжуулалт (ERC-3643)',
+  'partner.tokenization.detail': 'Гаргалтын дэд бүтэц',
   'partner.oracle': 'Оракл тайлан',
+  'partner.oracle.detail': 'Үйл ажиллагааны өгөгдөл нээлттэй болгох',
   'verify.jorc': 'JORC биет баталгаажуулалт',
   'verify.cctv': 'CCTV + AI дижитал баталгаажуулалт',
   'verify.cp': 'Бие даасан Competent Person тайлан (JORC / NI 43-101)',
@@ -78,6 +82,10 @@ const Map<String, String> mnStrings = {
   'tx.send': 'Илгээсэн',
   'tx.allocation': 'Төслийн хуваарилалт',
   'tx.issuance': 'Гаргалт',
+  'tx.from': '-с',
+  'tx.to': '-д',
+  'tx.status.completed': 'Дууссан',
+  'tx.status.failed': 'Амжилтгүй',
   'wallet.tx.vault': 'Цагаан Толгой vault',
 
   'common.retry': 'Дахин оролдох',
@@ -129,8 +137,17 @@ const Map<String, String> mnStrings = {
   'dash.howItWorks': 'MPC хэрхэн ажилладаг',
 
   'proj.title': 'Уул уурхайн төслүүд',
+  'proj.subtitle':
+      'Монголын уул уурхайн төслүүд болон тэдгээрийн гаргалтын явцыг үзнэ үү.',
   'proj.none': 'Одоогоор төсөл алга',
+  'proj.noneBody': 'Гаргалтын явц нийтлэгдэх бүрд төслүүдийг үзээрэй.',
   'proj.loadError': 'Төслүүдийг ачаалж чадсангүй',
+  'proj.loadErrorBody':
+      'Төслийн мэдээлэл түр боломжгүй байна. Таны хэтэвчид нөлөөлөхгүй.',
+  'proj.loadingTitle': 'Төслүүдийг ачаалж байна',
+  'proj.loadingBody':
+      'Хамгийн сүүлийн төсөл болон гаргалтын мэдээллийг шалгаж байна…',
+  'proj.tryAgain': 'Дахин оролдох',
   'proj.unavailable': 'Төслүүд боломжгүй байна',
   'proj.readiness': 'Гаргалтын бэлэн байдал',
   'proj.pipeline': 'Дамжлага',
@@ -151,52 +168,5 @@ const Map<String, String> mnStrings = {
   'proj.notFound': 'Төсөл олдсонгүй',
   'proj.betaHold': 'Хадгалах урсгал энэ бета хувилбарт хараахан ороогүй байна.',
 
-  'wallet.title': 'Хэтэвч',
-  'wallet.totalBalance': 'Нийт үлдэгдэл',
-  'wallet.demoNotice':
-      'Туршилтын хэтэвч — энэ бета хувилбарт бодит түлхүүр үүсгэх, хадгалахгүй.',
-  'wallet.allocations': 'Хуваарилалт',
-  'wallet.activity': 'Үйл ажиллагаа',
-  'wallet.receive': 'Хүлээн авах',
-  'wallet.send': 'Илгээх',
-  'wallet.unallocated': 'Хуваарилаагүй',
-  'wallet.noAllocations': 'Одоогоор хуваарилалт алга',
-  'wallet.noAllocationsBody':
-      'Идэвхтэй уул уурхайн төсөлд MPC хадгалбал энд харагдана.',
-  'wallet.unavailable': 'Хэтэвч боломжгүй байна',
-  'wallet.addressCopied': 'Хаяг хуулагдлаа',
-  'wallet.transfersLater': 'Шилжүүлгийн үйлдэл дараагийн үе шатанд нэмэгдэнэ.',
-
-  'earn.title': 'Орлого',
-  'earn.gatedBanner':
-      'Орлогын үйлдэл хараахан идэвхжээгүй. Стейкинг ба фарминг зөвхөн бүртгэл болон биеийн байцаалт (KYC)-ын дараа нээгдэнэ. Өнөөдөр харуулах хувь байхгүй.',
-  'earn.status.planned': 'Төлөвлөсөн',
-  'earn.rateLabel': 'Урамшууллын хувь',
-  'earn.ratePending': 'Бүртгэлийн үед зарлана',
-  'earn.notify': 'Мэдэгдэл авах',
-  'earn.notifyToast': 'Орлогын үйлдэл нээгдэхэд бид танд мэдэгдэнэ.',
-  'earn.staking.title': 'Стейкинг',
-  'earn.staking.body':
-      'Уул уурхайн хөрөнгийн гаргалтыг дэмжихийн тулд MPC-г түгжинэ. Урамшууллын нөхцөлийг бүртгэлийн үед хөтөлбөр нээгдэхэд нийтэлнэ.',
-  'earn.farming.title': 'Фарминг',
-  'earn.farming.body':
-      'Токен бүртгэгдсэний дараа MPC хөрвөх чадвар нийлүүлж, арилжааны үйл ажиллагаанаас орлого олно. Нөхцөлийг бүртгэлийн үед нийтэлнэ.',
-  'earn.whyGated': 'Яагаад хараахан үгүй вэ?',
-  'earn.gate.kyc.title': 'Биеийн байцаалт (KYC)',
-  'earn.gate.kyc.body':
-      'MPC гаргалт нь зөвшөөрөлтэй ERC-3643 стандарт дээр төлөвлөгдсөн тул орлого олоход баталгаажсан биеийн байцаалт шаардлагатай.',
-  'earn.gate.listing.title': 'Нийтийн бүртгэл',
-  'earn.gate.listing.body':
-      'Урамшууллын хувь ба сан нь MPC бүртгэгдэх үед тогтоогдоно. Түүнээс өмнө ямар ч хувь харуулахгүй.',
-
-  'settings.title': 'Тохиргоо',
-  'settings.profile': 'Профайл',
-  'settings.language': 'Хэл',
-  'settings.appearance': 'Харагдац',
-  'theme.system': 'Системийн',
-  'theme.light': 'Цайвар',
-  'theme.dark': 'Бараан',
-  'profile.title': 'Профайл',
-  'profile.details': 'Бүртгэлийн мэдээлэл',
-  'profile.walletAddress': 'Хаяг',
+  ...mnScreensStrings,
 };
