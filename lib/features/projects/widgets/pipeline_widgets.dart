@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/constants/mpc_facts.dart';
 import '../../../core/localization/locale_controller.dart';
@@ -6,19 +7,24 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../data/models/mining_project.dart';
 
-/// Colour for a layer status. Grounded, qualitative — never a percentage.
 Color layerStatusColor(BuildContext context, LayerStatus status) {
-  final p = context.palette;
   return switch (status) {
-    LayerStatus.secured => AppColors.positive,
+    LayerStatus.secured => AppColors.progressGreen,
     LayerStatus.inProgress => AppColors.info,
-    LayerStatus.inDiscussion => p.accent,
-    LayerStatus.planned => p.textLo,
+    LayerStatus.inDiscussion => AppColors.copper,
+    LayerStatus.planned => context.palette.dotMuted,
   };
 }
 
-/// Compact 4-dot indicator of the four-layer pipeline (Resource → Capital
-/// markets), coloured by status. Used on project cards.
+Color? layerStatusBg(LayerStatus status) {
+  return switch (status) {
+    LayerStatus.secured => AppColors.receiveIconBg,
+    LayerStatus.inProgress => AppColors.receiveIconBg,
+    LayerStatus.inDiscussion => AppColors.goldSoft,
+    LayerStatus.planned => AppColors.goldSoft,
+  };
+}
+
 class PipelineDots extends StatelessWidget {
   const PipelineDots({super.key, required this.pipeline});
   final List<LayerStatus> pipeline;
@@ -43,8 +49,6 @@ class PipelineDots extends StatelessWidget {
   }
 }
 
-/// Full pipeline breakdown: each infrastructure layer with its status pill.
-/// Layer names come from [MpcFacts.infraStack]; statuses from the project.
 class PipelineList extends StatelessWidget {
   const PipelineList({super.key, required this.pipeline});
   final List<LayerStatus> pipeline;
@@ -56,45 +60,58 @@ class PipelineList extends StatelessWidget {
     final count = pipeline.length < layers.length
         ? pipeline.length
         : layers.length;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         for (var i = 0; i < count; i++) ...[
-          Row(
-            children: [
-              Container(
-                width: 26,
-                height: 26,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: layerStatusColor(
-                    context,
-                    pipeline[i],
-                  ).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '${layers[i].index}',
-                  style: TextStyle(
-                    color: layerStatusColor(context, pipeline[i]),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SvgPicture.asset(layers[i].iconAsset, width: 18, height: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.tr(layers[i].titleKey),
+                        style: TextStyle(
+                          color: p.textHi,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          height: 16 / 13,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        context.tr(layers[i].briefKey),
+                        style: TextStyle(
+                          color: p.textLo,
+                          fontSize: 12,
+                          height: 17 / 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  context.tr(layers[i].titleKey),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                const SizedBox(width: 8),
+                Pill(
+                  context.tr(pipeline[i].key),
+                  color: layerStatusColor(context, pipeline[i]),
+                  backgroundColor: layerStatusBg(pipeline[i]),
+                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                  fontSize: 10,
                 ),
-              ),
-              Pill(
-                context.tr(pipeline[i].key),
-                color: layerStatusColor(context, pipeline[i]),
-              ),
-            ],
+              ],
+            ),
           ),
-          if (i != count - 1) Divider(color: p.border, height: 20),
+          if (i != count - 1)
+            Container(
+              height: 1,
+              color: isDark ? p.border : AppColors.layerDivider,
+            ),
         ],
       ],
     );

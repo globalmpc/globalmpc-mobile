@@ -14,6 +14,8 @@ class GlassCard extends StatelessWidget {
     this.onTap,
     this.blur = false,
     this.accent,
+    this.borderColor,
+    this.cornerRadius = 16,
   });
 
   final Widget child;
@@ -22,10 +24,13 @@ class GlassCard extends StatelessWidget {
   final bool blur;
   final Color? accent;
 
+  final Color? borderColor;
+  final double cornerRadius;
+
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
-    final radius = BorderRadius.circular(16);
+    final radius = BorderRadius.circular(cornerRadius);
 
     Widget content = Container(
       padding: padding,
@@ -33,7 +38,7 @@ class GlassCard extends StatelessWidget {
         color: p.surface.withValues(alpha: blur ? 0.72 : 1),
         borderRadius: radius,
         border: Border.all(
-          color: accent?.withValues(alpha: 0.45) ?? p.border,
+          color: accent?.withValues(alpha: 0.45) ?? borderColor ?? p.border,
           width: accent == null ? 0.7 : 1,
         ),
         boxShadow: accent == null

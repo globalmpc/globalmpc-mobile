@@ -1,9 +1,6 @@
-// GENERATED-STRUCTURE, HAND-TRANSLATED CONTENT.
-// Korean (한국어) translations for the MPC app.
-// Production-usable.
-// Keys must stay in sync with en.dart (the source of truth).
+import 'ko_screens.dart';
 
-const Map<String, String> koStrings = {
+final Map<String, String> koStrings = {
   'app.category': '광산 RWA 인프라',
   'app.tagline': '실물 광산 자산을 온체인에서 투자 가능하게. 몽골에서 시작합니다.',
   'app.trust': '정직함 그 자체가 신뢰 자본입니다.',
@@ -46,13 +43,17 @@ const Map<String, String> koStrings = {
   'scope.onChain': '온체인',
   'layer.resource.title': '자원 계층',
   'layer.resource.detail': '탐사, 실사, 오프테이크 구조화, 운영 파트너십.',
+  'layer.resource.brief': '탐사, 실사',
   'layer.structuring.title': '구조화 계층',
   'layer.structuring.detail': '현금흐름 모델링, 위험 워터폴, 현지 컴플라이언스.',
+  'layer.structuring.brief': '현금흐름 및 컴플라이언스 설계',
   'layer.tokenization.title': '토큰화 계층',
   'layer.tokenization.detail': 'RWA 발행, 레지스트리, 오라클 보고.',
   'layer.capital.title': '자본시장 계층',
   'layer.capital.detail': '수탁, OTC·거래소 거래, 2차 유동성.',
   'risk.resource.title': '자원 위험',
+  'layer.tokenization.brief': '발행, 레지스트리, 오라클',
+  'layer.capital.brief': '상장 및 2차 유동성',
   'risk.resource.detail': '독립 매장량 평가(예정).',
   'risk.operational.title': '운영 위험',
   'risk.operational.detail': 'SLA 기반 운영 통제 (설계 단계).',
@@ -61,8 +62,11 @@ const Map<String, String> koStrings = {
   'risk.regulatory.title': '규제 위험',
   'risk.regulatory.detail': 'KYC / AML 기준 사전 적용 (예정).',
   'partner.audit': '운영 감사',
+  'partner.audit.detail': '거래별로 위탁',
   'partner.tokenization': '토큰화 (ERC-3643)',
+  'partner.tokenization.detail': '발행 인프라',
   'partner.oracle': '오라클 보고',
+  'partner.oracle.detail': '운영 데이터 공개',
   'verify.jorc': 'JORC 실물 검증',
   'verify.cctv': 'CCTV + AI 디지털 검증',
   'verify.cp': '독립 Competent Person 보고서 (JORC / NI 43-101)',
@@ -70,6 +74,10 @@ const Map<String, String> koStrings = {
   'tx.send': '전송',
   'tx.allocation': '프로젝트 배정',
   'tx.issuance': '발행',
+  'tx.from': '에서',
+  'tx.to': '으로',
+  'tx.status.completed': '완료됨',
+  'tx.status.failed': '실패',
   'wallet.tx.vault': '차간 톨고이 볼트',
 
   'common.retry': '다시 시도',
@@ -115,8 +123,14 @@ const Map<String, String> koStrings = {
   'dash.howItWorks': 'MPC 작동 방식',
 
   'proj.title': '광산 프로젝트',
+  'proj.subtitle': '몽골 광산 프로젝트와 발행 진행 상황을 살펴보세요.',
   'proj.none': '아직 프로젝트가 없습니다',
+  'proj.noneBody': '발행 진행 상황이 공개되면 프로젝트를 둘러보실 수 있습니다.',
   'proj.loadError': '프로젝트를 불러올 수 없습니다',
+  'proj.loadErrorBody': '프로젝트 정보를 일시적으로 사용할 수 없습니다. 지갑에는 영향이 없습니다.',
+  'proj.loadingTitle': '프로젝트를 불러오는 중',
+  'proj.loadingBody': '최신 프로젝트 및 발행 정보를 확인하는 중…',
+  'proj.tryAgain': '다시 시도',
   'proj.unavailable': '프로젝트를 사용할 수 없습니다',
   'proj.readiness': '발행 준비도',
   'proj.pipeline': '파이프라인',
@@ -137,49 +151,5 @@ const Map<String, String> koStrings = {
   'proj.notFound': '프로젝트를 찾을 수 없습니다',
   'proj.betaHold': '보유 기능은 아직 이 베타에 포함되지 않았습니다.',
 
-  'wallet.title': '지갑',
-  'wallet.totalBalance': '총 잔액',
-  'wallet.demoNotice': '데모 지갑입니다. 이 베타에서는 실제 키가 생성되거나 저장되지 않습니다.',
-  'wallet.allocations': '배정 내역',
-  'wallet.activity': '활동 내역',
-  'wallet.receive': '받기',
-  'wallet.send': '보내기',
-  'wallet.unallocated': '미배정',
-  'wallet.noAllocations': '아직 배정 내역이 없습니다',
-  'wallet.noAllocationsBody': '진행 중인 광산 프로젝트에 MPC를 보유하면 여기에 표시됩니다.',
-  'wallet.unavailable': '지갑을 사용할 수 없습니다',
-  'wallet.addressCopied': '주소가 복사되었습니다',
-  'wallet.transfersLater': '전송 기능은 이후 단계에서 제공됩니다.',
-
-  'earn.title': '수익',
-  'earn.gatedBanner':
-      '수익 기능은 아직 제공되지 않습니다. 스테이킹과 파밍은 상장과 신원 인증(KYC) 이후에만 열립니다. 현재 표시할 수 있는 수익률은 없습니다.',
-  'earn.status.planned': '예정',
-  'earn.rateLabel': '보상률',
-  'earn.ratePending': '상장 시 공지',
-  'earn.notify': '알림 받기',
-  'earn.notifyToast': '수익 기능이 열리면 알려드리겠습니다.',
-  'earn.staking.title': '스테이킹',
-  'earn.staking.body':
-      'MPC를 예치하여 광산 자산 발행을 지원합니다. 보상 조건은 상장 시 프로그램이 열릴 때 공개됩니다.',
-  'earn.farming.title': '파밍',
-  'earn.farming.body':
-      '토큰 상장 후 MPC 유동성을 공급하고 거래 활동으로부터 수익을 얻습니다. 조건은 상장 시 공개됩니다.',
-  'earn.whyGated': '왜 아직인가요?',
-  'earn.gate.kyc.title': '신원 인증 (KYC)',
-  'earn.gate.kyc.body':
-      'MPC 발행은 허가형 표준인 ERC-3643 기반으로 설계되어, 수익 활동에는 인증된 신원이 필요합니다.',
-  'earn.gate.listing.title': '상장',
-  'earn.gate.listing.body': '보상률과 풀은 MPC 상장 시 결정됩니다. 그 전에는 어떤 수치도 표시하지 않습니다.',
-
-  'settings.title': '설정',
-  'settings.profile': '프로필',
-  'settings.language': '언어',
-  'settings.appearance': '테마',
-  'theme.system': '시스템 설정',
-  'theme.light': '라이트',
-  'theme.dark': '다크',
-  'profile.title': '프로필',
-  'profile.details': '계정 정보',
-  'profile.walletAddress': '주소',
+  ...koScreensStrings,
 };

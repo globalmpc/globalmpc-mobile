@@ -1,7 +1,7 @@
 name: mpc_mining_app
 description: "MPC — Mongolian mining RWA app. Browse tokenized mining projects, hold MPC, track your position."
 publish_to: 'none'
-version: 0.1.0+3
+version: 0.1.0+4
 
 environment:
   sdk: ^3.11.3
@@ -38,6 +38,7 @@ dependencies:
   # PBKDF2 for the device PIN. Already in the tree via web3dart; declared
   # explicitly because we import it directly, and pinned for the same reason.
   pointycastle: 3.9.1
+  flutter_local_notifications: 18.0.1
 
 dev_dependencies:
   flutter_test:
@@ -51,6 +52,15 @@ flutter:
     - assets/brand/
     - assets/icons/auth/
     - assets/icons/bottom-nav/
+    - assets/icons/infra/
+    - assets/icons/projects/
+    - assets/icons/dashboard/
+    - assets/icons/wallet/
+    - assets/icons/commodities/
+    - assets/icons/verification/
+    - assets/icons/notifications/
+    - assets/icons/earn/
+    - assets/splash/
   fonts:
     - family: Inter
       fonts:

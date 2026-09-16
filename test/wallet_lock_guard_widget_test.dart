@@ -9,12 +9,6 @@ import 'package:mpc_mining_app/core/security/wallet_lock_controller.dart';
 import 'package:mpc_mining_app/core/theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// End-to-end cover for the router guard wiring.
-///
-/// `AppRouter.redirectFor` is unit-tested on its own, but a correct decision
-/// function wired up wrongly still ships a broken app: either an unguarded
-/// wallet, or a redirect loop that traps the user on the unlock screen with no
-/// way forward. These pump the real router.
 void main() {
   late WalletLockController lock;
 
@@ -59,12 +53,8 @@ void main() {
 
     await pumpAt(tester, '/wallet');
 
-    // Landed on the unlock screen instead.
     expect(find.text('Welcome back'), findsOneWidget);
-    expect(
-      find.text('Enter your device PIN to unlock your wallet.'),
-      findsOneWidget,
-    );
+    expect(find.text('Enter your PIN to unlock your wallet.'), findsOneWidget);
   });
 
   testWidgets('a locked wallet cannot reach settings', (tester) async {
@@ -80,8 +70,6 @@ void main() {
   ) async {
     await startLock(withWallet: true);
 
-    // If /unlock were itself guarded, the router would redirect forever and
-    // pumpAndSettle would time out rather than reaching a frame.
     await pumpAt(tester, '/unlock');
 
     expect(find.text('Welcome back'), findsOneWidget);
@@ -94,8 +82,6 @@ void main() {
 
     await pumpAt(tester, '/wallet/import');
 
-    // Redirecting this to /unlock would strand a user who forgot their PIN,
-    // since the phrase is the only way back in.
     expect(find.text('Welcome back'), findsNothing);
     expect(find.text('Restore your existing wallet'), findsOneWidget);
   });
