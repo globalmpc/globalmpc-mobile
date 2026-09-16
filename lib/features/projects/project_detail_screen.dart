@@ -1,19 +1,17 @@
 import 'package:mpc_mining_app/core/theme/app_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/constants/mpc_facts.dart';
 import '../../core/localization/locale_controller.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_theme.dart';
-import '../../core/utils/formatters.dart';
 import '../../core/widgets/common_widgets.dart';
 import '../../core/widgets/glass_card.dart';
 import '../../core/widgets/mining_hero_art.dart';
 import '../../data/models/mining_project.dart';
 import 'widgets/pipeline_widgets.dart';
-import '../web/web_view_screen.dart';
+import 'widgets/project_detail_cards.dart';
 import 'projects_provider.dart';
 
 class ProjectDetailScreen extends StatelessWidget {
@@ -42,8 +40,6 @@ class ProjectDetailScreen extends StatelessWidget {
   }
 }
 
-/// Keeps the hero image free of overlaid copy. Title lives on the page surface;
-/// the collapsed app bar re-shows it once the hero is scrolled away.
 class _ProjectDetailView extends StatefulWidget {
   const _ProjectDetailView({required this.project});
   final MiningProject project;
@@ -71,7 +67,6 @@ class _ProjectDetailViewState extends State<_ProjectDetailView> {
   }
 
   void _onScroll() {
-    // Show toolbar title once most of the hero has scrolled under the bar.
     final next =
         _scroll.hasClients &&
         _scroll.offset > (_expandedHeight - kToolbarHeight - 24);
@@ -81,6 +76,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView> {
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final project = widget.project;
     final name = context.tr(project.nameKey);
 
@@ -92,7 +88,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView> {
           SliverAppBar(
             pinned: true,
             expandedHeight: _expandedHeight,
-            backgroundColor: p.surface,
+            backgroundColor: p.bg,
             surfaceTintColor: Colors.transparent,
             elevation: 0,
             scrolledUnderElevation: _collapsed ? 0.5 : 0,
@@ -102,13 +98,20 @@ class _ProjectDetailViewState extends State<_ProjectDetailView> {
               child: Material(
                 color: _collapsed
                     ? Colors.transparent
-                    : p.surface.withValues(alpha: 0.92),
+                    : isDark
+                    ? const Color(0xE616120F)
+                    : p.surface.withValues(alpha: 0.9),
                 shape: const CircleBorder(),
                 clipBehavior: Clip.antiAlias,
-                child: const MpcBackButton(fallbackRoute: '/projects'),
+                child: MpcBackButton(
+                  fallbackRoute: '/projects',
+                  iconAsset: isDark
+                      ? null
+                      : 'assets/icons/projects/arrow-back.svg',
+                ),
               ),
             ),
-            // Image-only when expanded; title fades in after collapse.
+
             title: AnimatedOpacity(
               opacity: _collapsed ? 1 : 0,
               duration: const Duration(milliseconds: 160),
@@ -129,17 +132,24 @@ class _ProjectDetailViewState extends State<_ProjectDetailView> {
                 fit: StackFit.expand,
                 children: [
                   MiningHeroArt(kind: project.artKind),
-                  // Blend hero into the page background — no text on gold.
+
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: IgnorePointer(
                       child: Container(
-                        height: 56,
+                        height: 61,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [p.bg.withValues(alpha: 0), p.bg],
+                            colors: isDark
+                                ? const [
+                                    Color(0x00BF7C42),
+                                    Color(0x480C0A09),
+                                    Color(0xFF0C0A09),
+                                  ]
+                                : [p.bg.withValues(alpha: 0), p.bg],
+                            stops: isDark ? const [0.0, 0.4611, 0.9426] : null,
                           ),
                         ),
                       ),
@@ -150,396 +160,132 @@ class _ProjectDetailViewState extends State<_ProjectDetailView> {
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 36),
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 36),
             sliver: SliverList.list(
               children: [
                 Text(
                   name,
                   style: TextStyle(
                     color: p.textHi,
-                    fontSize: 22,
+                    fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    height: 1.25,
-                    letterSpacing: -0.3,
+                    height: 31 / 24,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Row(
                   children: [
-                    Icon(AppIcons.place_outlined, size: 15, color: p.textLo),
+                    Icon(AppIcons.place_outlined, size: 16, color: p.textLo),
                     const SizedBox(width: 4),
                     Text(
                       context.tr(project.location),
-                      style: TextStyle(color: p.textLo, fontSize: 13),
+                      style: TextStyle(
+                        color: p.textLo,
+                        fontSize: 12,
+                        height: 17 / 12,
+                      ),
                     ),
                     const Spacer(),
-                    Pill(context.tr(project.stage.key), color: p.primary),
+                    Pill(
+                      context.tr(project.stage.key),
+                      color: switch (project.stage) {
+                        ProjectStage.inDiscussion => AppColors.copper,
+                        ProjectStage.secured => AppColors.positive,
+                        ProjectStage.toBeSecured => AppColors.copper,
+                        ProjectStage.comingSoon => p.textLo,
+                      },
+                      backgroundColor: switch (project.stage) {
+                        ProjectStage.inDiscussion => AppColors.goldSoft,
+                        ProjectStage.secured => null,
+                        ProjectStage.toBeSecured => AppColors.goldSoft,
+                        ProjectStage.comingSoon => null,
+                      },
+                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                      fontSize: 10,
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
+                  spacing: 5,
+                  runSpacing: 5,
                   children: [
                     for (final c in project.commodities)
-                      Pill(
-                        context.tr(c),
-                        color: p.accent,
-                        icon: AppIcons.diamond_outlined,
-                      ),
+                      if (c == 'commodity.lithium' ||
+                          c == 'commodity.silicon' ||
+                          c == 'commodity.rareEarth')
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.lightBorder,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: SvgPicture.asset(
+                            'assets/icons/commodities/${c.split('.').last == 'rareEarth' ? 'rare_earth' : c.split('.').last}.svg',
+                            height: 12,
+                          ),
+                        )
+                      else
+                        Pill(
+                          context.tr(c),
+                          color: AppColors.copper,
+                          backgroundColor: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder,
+                          icon: AppIcons.diamond_outlined,
+                          padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                          fontSize: 10,
+                        ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 Text(
                   context.tr(project.description),
-                  style: TextStyle(color: p.textHi, height: 1.5, fontSize: 14),
-                ),
-                const SizedBox(height: 24),
-                SectionHeader(context.tr('proj.pipeline')),
-                const SizedBox(height: 10),
-                GlassCard(child: PipelineList(pipeline: project.pipeline)),
-                const SizedBox(height: 24),
-                SectionHeader(context.tr('proj.verification')),
-                const SizedBox(height: 10),
-                _VerificationCard(methods: project.verificationMethods),
-                const SizedBox(height: 24),
-                SectionHeader(context.tr('proj.governance')),
-                const SizedBox(height: 10),
-                const _RiskCard(),
-                const SizedBox(height: 24),
-                SectionHeader(context.tr('proj.partners')),
-                const SizedBox(height: 10),
-                const _PartnersCard(),
-                const SizedBox(height: 24),
-                SectionHeader(context.tr('proj.contract')),
-                const SizedBox(height: 10),
-                const _ContractCard(),
-                const SizedBox(height: 24),
-                _CtaButtons(project: project),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Verification methods with their real status.
-///
-/// No completed-check icon is used here: per whitepaper Appendix D nothing in
-/// this list is complete yet, so a tick would read as "verified" and overstate
-/// the position. The status pill carries the truth instead.
-class _VerificationCard extends StatelessWidget {
-  const _VerificationCard({required this.methods});
-  final List<VerificationMethod> methods;
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.palette;
-    return GlassCard(
-      child: Column(
-        children: [
-          for (var i = 0; i < methods.length; i++) ...[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(AppIcons.circle_outlined, size: 16, color: p.textLo),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.tr(methods[i].labelKey),
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      const SizedBox(height: 6),
-                      Pill(
-                        context.tr(methods[i].status.key),
-                        color: AppColors.warning,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (i != methods.length - 1) Divider(color: p.border, height: 20),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _RiskCard extends StatelessWidget {
-  const _RiskCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.palette;
-    return GlassCard(
-      child: Column(
-        children: [
-          for (var i = 0; i < MpcFacts.riskLayers.length; i++) ...[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 5),
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    color: p.accent,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.tr(MpcFacts.riskLayers[i].titleKey),
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        context.tr(MpcFacts.riskLayers[i].detailKey),
-                        style: TextStyle(
-                          color: p.textLo,
-                          fontSize: 12.5,
-                          height: 1.3,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (i != MpcFacts.riskLayers.length - 1)
-              Divider(color: p.border, height: 20),
-          ],
-          Divider(color: p.border, height: 22),
-          Row(
-            children: [
-              Icon(Icons.event_note_outlined, size: 16, color: p.textLo),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  context.tr(MpcFacts.disclosureKey),
                   style: TextStyle(
                     color: p.textLo,
-                    fontSize: 12.5,
-                    height: 1.3,
+                    fontSize: 12,
+                    height: 17 / 12,
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PartnersCard extends StatelessWidget {
-  const _PartnersCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.palette;
-    return GlassCard(
-      child: Column(
-        children: [
-          for (var i = 0; i < MpcFacts.partners.length; i++) ...[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: p.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: p.primary.withValues(alpha: 0.18),
-                    ),
+                const SizedBox(height: 20),
+                SectionHeader(context.tr('proj.pipeline'), fontSize: 18),
+                const SizedBox(height: 14),
+                GlassCard(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 16,
                   ),
-                  child: Text(
-                    MpcFacts.partners[i].name.substring(0, 1),
-                    style: TextStyle(
-                      color: p.primary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
-                  ),
+                  borderColor: isDark ? null : AppColors.layerCardBorder,
+                  child: PipelineList(pipeline: project.pipeline),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        MpcFacts.partners[i].name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          height: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.tr(MpcFacts.partners[i].roleKey),
-                        style: TextStyle(
-                          color: p.textLo,
-                          fontSize: 12.5,
-                          height: 1.35,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Pill(
-                          context.tr(MpcFacts.partners[i].status.key),
-                          color: AppColors.warning,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                const SizedBox(height: 20),
+                SectionHeader(context.tr('proj.verification'), fontSize: 18),
+                const SizedBox(height: 14),
+                ProjectVerificationCard(methods: project.verificationMethods),
+                const SizedBox(height: 20),
+                SectionHeader(context.tr('proj.governance'), fontSize: 18),
+                const SizedBox(height: 14),
+                const ProjectRiskCard(),
+                const SizedBox(height: 20),
+                SectionHeader(context.tr('proj.partners'), fontSize: 18),
+                const SizedBox(height: 14),
+                const ProjectPartnersCard(),
+                const SizedBox(height: 20),
+                SectionHeader(context.tr('proj.contract'), fontSize: 18),
+                const SizedBox(height: 14),
+                const ProjectContractCard(),
+                const SizedBox(height: 20),
+                ProjectCtaButtons(project: project),
               ],
             ),
-            if (i != MpcFacts.partners.length - 1)
-              Divider(color: p.border, height: 24),
-          ],
-          Divider(color: p.border, height: 22),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(AppIcons.info_outline, size: 15, color: p.textLo),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  context.tr('proj.orchestrationNote'),
-                  style: TextStyle(
-                    color: p.textLo,
-                    fontSize: 12.5,
-                    height: 1.35,
-                  ),
-                ),
-              ),
-            ],
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ContractCard extends StatelessWidget {
-  const _ContractCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final p = context.palette;
-    return GlassCard(
-      child: Column(
-        children: [
-          _row(
-            context,
-            context.tr('proj.tokenStandard'),
-            MpcFacts.tokenStandard,
-          ),
-          Divider(color: p.border, height: 20),
-          _row(context, context.tr('dash.network'), MpcFacts.network),
-          Divider(color: p.border, height: 20),
-          InkWell(
-            borderRadius: BorderRadius.circular(8),
-            onTap: () => context.push(
-              '/webview',
-              extra: WebViewArgs(
-                url: MpcFacts.explorerTokenUrl,
-                title: MpcFacts.networkShort,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Text(
-                    context.tr('dash.contract'),
-                    style: TextStyle(color: p.textLo),
-                  ),
-                  const Spacer(),
-                  Flexible(
-                    child: Text(
-                      Fmt.shortAddress(MpcFacts.contractAddress),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: AppTheme.monoFont,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Icon(AppIcons.open_in_new, size: 16, color: p.primary),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _row(BuildContext context, String label, String value) {
-    final p = context.palette;
-    return Row(
-      children: [
-        Text(label, style: TextStyle(color: p.textLo)),
-        const Spacer(),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-      ],
-    );
-  }
-}
-
-class _CtaButtons extends StatelessWidget {
-  const _CtaButtons({required this.project});
-  final MiningProject project;
-
-  @override
-  Widget build(BuildContext context) {
-    // Holding is not open for any asset pre-listing — stay honest, disable it.
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: null,
-            icon: const Icon(AppIcons.add_circle_outline),
-            label: Text(context.tr('proj.notOpen')),
-          ),
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () => context.push(
-              '/webview',
-              extra: WebViewArgs(
-                url: MpcFacts.explorerTokenUrl,
-                title: context.tr('proj.viewExplorer'),
-              ),
-            ),
-            icon: const Icon(AppIcons.open_in_new, size: 18),
-            label: Text(context.tr('proj.viewExplorer')),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -1,12 +1,9 @@
-// GENERATED-STRUCTURE, HAND-TRANSLATED CONTENT.
-// English translations for the MPC app.
-// Source of truth. All other languages fall back to these keys.
-// Keys must stay in sync with en.dart (the source of truth).
+import 'en_screens.dart';
 
-const Map<String, String> enStrings = {
-  'app.category': 'Mining RWA infrastructure',
+final Map<String, String> enStrings = {
+  'app.category': 'Non-custodial wallet for mining RWA',
   'app.tagline':
-      'Real mining assets, made investable on-chain. Starting with Mongolia.',
+      'Real mining assets, made verifiable on-chain. Your keys, your wallet.',
   'app.trust': 'Honesty itself is trust capital.',
 
   'nav.home': 'Home',
@@ -30,7 +27,7 @@ const Map<String, String> enStrings = {
   'commodity.silicon': 'Silicon',
   'commodity.lithium': 'Lithium',
   'commodity.rareEarth': 'Rare earth elements',
-  'commodity.tba': 'To be announced',
+  'commodity.tba': 'Details to be announced',
   'proj.tsagaan.name': 'Tsagaan Tolgoi Strategic Minerals',
   'proj.tsagaan.summary':
       'First reference asset in the MPC pipeline. Development, production and supply leadership under discussion.',
@@ -42,7 +39,7 @@ const Map<String, String> enStrings = {
       'A further strategic resource is in discussion. MPC will publish structuring and verification detail as the asset advances, following the same repeatable, auditable issuance standard.',
 
   'facts.tagline':
-      'Translating Mongolian mining resources into the language of global capital markets.',
+      'Translating mining resources into the language of global capital markets.',
   'facts.disclosure':
       'Quarterly operational reporting with on-chain disclosure.',
   'facts.plannedStandard': 'ERC-3643 · planned',
@@ -51,14 +48,18 @@ const Map<String, String> enStrings = {
   'layer.resource.title': 'Resource Layer',
   'layer.resource.detail':
       'Exploration, due diligence, offtake structuring, and operations partnerships.',
+  'layer.resource.brief': 'Exploration, due diligence',
   'layer.structuring.title': 'Structuring Layer',
   'layer.structuring.detail':
       'Cash-flow modelling, risk waterfall, and local compliance.',
+  'layer.structuring.brief': 'Cash-flow and compliance design',
   'layer.tokenization.title': 'Tokenization Layer',
   'layer.tokenization.detail': 'RWA issuance, registry, and oracle reporting.',
   'layer.capital.title': 'Capital Markets Layer',
   'layer.capital.detail':
       'Custody, OTC / exchange trading, and secondary liquidity.',
+  'layer.tokenization.brief': 'Issuance, registry, oracles',
+  'layer.capital.brief': 'Listing and secondary trading',
   'risk.resource.title': 'Resource risk',
   'risk.resource.detail': 'Independent reserve assessment (planned).',
   'risk.operational.title': 'Operational risk',
@@ -68,8 +69,11 @@ const Map<String, String> enStrings = {
   'risk.regulatory.title': 'Regulatory risk',
   'risk.regulatory.detail': 'KYC / AML standards applied in advance (planned).',
   'partner.audit': 'Operational audit',
+  'partner.audit.detail': 'Commissioned per deal',
   'partner.tokenization': 'Tokenization (ERC-3643)',
+  'partner.tokenization.detail': 'Issuance infrastructure',
   'partner.oracle': 'Oracle reporting',
+  'partner.oracle.detail': 'Operational data disclosure',
   'verify.jorc': 'JORC physical verification',
   'verify.cctv': 'CCTV + AI digital verification',
   'verify.cp': 'Independent Competent Person report (JORC / NI 43-101)',
@@ -77,6 +81,10 @@ const Map<String, String> enStrings = {
   'tx.send': 'Sent',
   'tx.allocation': 'Project allocation',
   'tx.issuance': 'Issuance',
+  'tx.from': 'from',
+  'tx.to': 'to',
+  'tx.status.completed': 'Completed',
+  'tx.status.failed': 'Failed',
   'wallet.tx.vault': 'Tsagaan Tolgoi vault',
 
   'common.retry': 'Retry',
@@ -87,19 +95,19 @@ const Map<String, String> enStrings = {
   'onboard.enter': 'Enter',
   'onboard.b1.title': 'Real mining assets',
   'onboard.b1.body':
-      'Browse Mongolian mining projects and their issuance progress.',
+      'Browse tokenized mining projects and their issuance progress.',
   'onboard.b2.title': 'Auditable by design',
   'onboard.b2.body': 'Physical checks plus on-chain disclosure.',
   'onboard.b3.title': 'Track your MPC',
   'onboard.b3.body':
-      'Balance and history, with proof for every claim. Total supply 10B.',
+      'Balance and history, with proof for every claim. Planned total supply 10B.',
 
   'dash.balance': 'Est. Total Value (MPC)',
   'dash.addFunds': 'Deposit',
   'dash.demo': 'Demo',
   'dash.testnet': 'Testnet',
   'dash.utilityToken': 'Utility token',
-  'dash.totalSupply': 'Total supply',
+  'dash.totalSupply': 'Planned supply',
   'dash.network': 'Network',
   'dash.listing': 'Listing',
   'dash.issuer': 'Issuer',
@@ -119,7 +127,7 @@ const Map<String, String> enStrings = {
   'tour.actions.body': 'Jump to projects, earn, wallet, or the block explorer.',
   'tour.projects.title': 'Mining projects',
   'tour.projects.body':
-      'Browse tokenized Mongolian mining assets and their status.',
+      'Browse tokenized mining assets and their status.',
   'tour.settings.title': 'Language & settings',
   'tour.settings.body':
       'Tap the gear to open Settings, where you can change the app language, theme, and your profile.',
@@ -127,8 +135,17 @@ const Map<String, String> enStrings = {
   'dash.howItWorks': 'How MPC works',
 
   'proj.title': 'Mining projects',
+  'proj.subtitle':
+      'Browse tokenized mining projects and their issuance progress.',
   'proj.none': 'No projects yet',
+  'proj.noneBody':
+      'New mining assets will appear here as their source and issuance status are published.',
   'proj.loadError': 'Could not load projects',
+  'proj.loadErrorBody':
+      'Project information is temporarily unavailable. Your wallet is not affected.',
+  'proj.loadingTitle': 'Loading projects',
+  'proj.loadingBody': 'Checking the latest project and issuance information…',
+  'proj.tryAgain': 'Try again',
   'proj.unavailable': 'Projects unavailable',
   'proj.readiness': 'Issuance readiness',
   'proj.pipeline': 'Pipeline',
@@ -149,52 +166,5 @@ const Map<String, String> enStrings = {
   'proj.notFound': 'Project not found',
   'proj.betaHold': 'Holding flow is not part of this beta yet.',
 
-  'wallet.title': 'Wallet',
-  'wallet.totalBalance': 'Total balance',
-  'wallet.demoNotice':
-      'Demo wallet — no real keys are generated or stored in this beta.',
-  'wallet.allocations': 'Allocations',
-  'wallet.activity': 'Activity',
-  'wallet.receive': 'Receive',
-  'wallet.send': 'Send',
-  'wallet.unallocated': 'Unallocated',
-  'wallet.noAllocations': 'No allocations yet',
-  'wallet.noAllocationsBody':
-      'Hold MPC against a live mining project to see it here.',
-  'wallet.unavailable': 'Wallet unavailable',
-  'wallet.addressCopied': 'Address copied',
-  'wallet.transfersLater': 'Transfers land in a later milestone.',
-
-  'earn.title': 'Earn',
-  'earn.gatedBanner':
-      'Earn is not live yet. Staking and farming open only after listing and identity verification (KYC). No rate exists to show today.',
-  'earn.status.planned': 'Planned',
-  'earn.rateLabel': 'Reward rate',
-  'earn.ratePending': 'Announced at listing',
-  'earn.notify': 'Notify me',
-  'earn.notifyToast': "We'll let you know when Earn opens.",
-  'earn.staking.title': 'Staking',
-  'earn.staking.body':
-      'Lock MPC to back mining-asset issuance. Reward terms are published when the program opens at listing.',
-  'earn.farming.title': 'Farming',
-  'earn.farming.body':
-      'Provide MPC liquidity once the token lists, and earn from trading activity. Terms are published at listing.',
-  'earn.whyGated': 'Why not yet?',
-  'earn.gate.kyc.title': 'Identity verification (KYC)',
-  'earn.gate.kyc.body':
-      'MPC issuance is designed on ERC-3643, a permissioned standard, so earning will require a verified identity.',
-  'earn.gate.listing.title': 'Public listing',
-  'earn.gate.listing.body':
-      'Reward rates and pools are set when MPC lists. No rate is shown before then.',
-
-  'settings.title': 'Settings',
-  'settings.profile': 'Profile',
-  'settings.language': 'Language',
-  'settings.appearance': 'Appearance',
-  'theme.system': 'System',
-  'theme.light': 'Light',
-  'theme.dark': 'Dark',
-  'profile.title': 'Profile',
-  'profile.details': 'Account details',
-  'profile.walletAddress': 'Address',
+  ...enScreensStrings,
 };

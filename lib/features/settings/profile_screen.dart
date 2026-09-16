@@ -13,6 +13,7 @@ import '../../core/widgets/common_widgets.dart';
 import '../../core/widgets/glass_card.dart';
 import '../wallet/wallet_provider.dart';
 import '../web/web_view_screen.dart';
+import 'settings_widgets.dart';
 
 /// Wallet identity. There are no user accounts and no personal data, by
 /// explicit product decision: the wallet address IS the identity. Today this shows
@@ -28,7 +29,11 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const MpcBackButton(fallbackRoute: '/settings'),
+        leading: const MpcBackButton(
+          fallbackRoute: '/settings',
+          iconAsset: 'assets/icons/wallet/back-arrow-circle.svg',
+          iconSize: 28,
+        ),
         title: Text(context.tr('profile.title')),
       ),
       body: SafeArea(
@@ -51,6 +56,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   GlassCard(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
+                    borderColor: settingsCardBorder(context, p.border),
                     child: Column(
                       children: [
                         _InfoRow(

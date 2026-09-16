@@ -52,6 +52,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pumpAndSettle();
   }
 
   Future<void> openRemoveDialog(WidgetTester tester) async {
@@ -61,6 +63,8 @@ void main() {
       240,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.ensureVisible(button);
+    await tester.pumpAndSettle();
     await tester.tap(button);
     await tester.pumpAndSettle();
     expect(find.text('Remove wallet?'), findsOneWidget);
