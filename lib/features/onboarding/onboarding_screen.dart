@@ -3,15 +3,20 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/localization/locale_controller.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/language_selector_pill.dart';
 import '../../core/widgets/mpc_logo.dart';
-import '../settings/language_sheet.dart';
 
-/// Wallet entry built on top of the existing DApp shell.
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final badge = context.tr('onboard.badge');
+    final headline = context.tr('onboard.headline');
+    final subhead = context.tr('onboard.subhead');
+    final createLabel = context.tr('onboard.create');
+    final importLabel = context.tr('onboard.import');
+
     return Scaffold(
       backgroundColor: AppColors.darkBg,
       body: Stack(
@@ -43,13 +48,8 @@ class OnboardingScreen extends StatelessWidget {
             ),
           ),
           SafeArea(
-            // Scrolls only when it has to. On a normal phone the viewport is
-            // taller than the content, so the [Spacer] below still pushes the
-            // call to action to the bottom and the screen looks unchanged. On
-            // a short device, or in a language whose copy runs longer, the
-            // overflow becomes a scroll instead of a clipped first screen.
             child: LayoutBuilder(
-              builder: (context, constraints) => SingleChildScrollView(
+              builder: (_, constraints) => SingleChildScrollView(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: IntrinsicHeight(
@@ -67,7 +67,7 @@ class OnboardingScreen extends StatelessWidget {
                                   children: [
                                     const Row(
                                       children: [
-                                        MpcLogo(size: 24, tint: AppColors.gold),
+                                        MpcLogo(size: 24),
                                         SizedBox(width: 8),
                                         Text(
                                           'MPC',
@@ -91,7 +91,7 @@ class OnboardingScreen extends StatelessWidget {
                                   ],
                                 ),
                                 const Spacer(),
-                                const _WelcomeLanguageSelector(),
+                                const LanguageSelectorPill(),
                               ],
                             ),
                           ),
@@ -105,18 +105,11 @@ class OnboardingScreen extends StatelessWidget {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.copper.withValues(
-                                    alpha: .16,
-                                  ),
-                                  border: Border.all(
-                                    color: AppColors.gold.withValues(
-                                      alpha: .35,
-                                    ),
-                                  ),
+                                  color: const Color(0xFF3A241D),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
-                                  context.tr('onboard.badge'),
+                                  badge,
                                   style: const TextStyle(
                                     color: AppColors.gold,
                                     fontSize: 10,
@@ -127,7 +120,7 @@ class OnboardingScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                context.tr('onboard.headline'),
+                                headline,
                                 style: const TextStyle(
                                   color: AppColors.darkTextHi,
                                   fontSize: 36,
@@ -138,7 +131,7 @@ class OnboardingScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                context.tr('onboard.subhead'),
+                                subhead,
                                 style: const TextStyle(
                                   color: AppColors.darkTextLo,
                                   fontSize: 14,
@@ -160,7 +153,7 @@ class OnboardingScreen extends StatelessWidget {
                                     ),
                                   ),
                                   child: Text(
-                                    context.tr('onboard.create'),
+                                    createLabel,
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
@@ -184,7 +177,7 @@ class OnboardingScreen extends StatelessWidget {
                                     ),
                                   ),
                                   child: Text(
-                                    context.tr('onboard.import'),
+                                    importLabel,
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
@@ -203,64 +196,6 @@ class OnboardingScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _WelcomeLanguageSelector extends StatelessWidget {
-  const _WelcomeLanguageSelector();
-
-  @override
-  Widget build(BuildContext context) {
-    final language = LocaleControllerScope.of(context).language;
-
-    // Opens the same sheet Settings uses, so every language the app ships is
-    // reachable from the first screen.
-    return Semantics(
-      label: 'Language',
-      value: language.englishName,
-      button: true,
-      child: InkWell(
-        onTap: () => LanguageSheet.show(context),
-        borderRadius: BorderRadius.circular(9),
-        child: Container(
-          height: 34,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: .28),
-            border: Border.all(color: Colors.white24),
-            borderRadius: BorderRadius.circular(9),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.language_rounded,
-                size: 15,
-                color: AppColors.darkTextLo,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                // The two-letter code, not the native name: it keeps the
-                // control a fixed width in every language, so the header row
-                // cannot overflow on a narrow device.
-                language.locale.languageCode.toUpperCase(),
-                style: const TextStyle(
-                  color: AppColors.darkTextHi,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(width: 2),
-              const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 15,
-                color: AppColors.darkTextLo,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

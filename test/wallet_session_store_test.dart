@@ -187,6 +187,18 @@ void main() {
       expect(await store.pinLockoutRemaining(), isNull);
     });
 
+    test('a biometric unlock resets the counter', () async {
+      await store.configure(pin: correctPin, biometrics: true);
+
+      await failTimes(2);
+      await store.clearPinFailures();
+
+      expect(await store.pinFailureCount(), 0);
+
+      await failTimes(WalletSessionStore.maxPinAttempts - 1);
+      expect(await store.pinLockoutRemaining(), isNull);
+    });
+
     test('configure and updatePin clear an active lockout', () async {
       await store.configure(pin: correctPin, biometrics: false);
       await failTimes(WalletSessionStore.maxPinAttempts);

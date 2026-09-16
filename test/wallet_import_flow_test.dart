@@ -6,7 +6,7 @@ import 'package:mpc_mining_app/core/localization/app_strings.dart';
 import 'package:mpc_mining_app/core/localization/locale_controller.dart';
 import 'package:mpc_mining_app/core/router/app_router.dart';
 import 'package:mpc_mining_app/core/theme/app_theme.dart';
-import 'package:mpc_mining_app/features/wallet/wallet_entry_flow_screen.dart';
+import 'package:mpc_mining_app/features/entry/entry_flow_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -59,9 +59,7 @@ void main() {
       ],
     );
 
-    await tester.pumpWidget(
-      MaterialApp.router(theme: AppTheme.dark(), routerConfig: router),
-    );
+    await pumpLocalizedOnboarding(tester, router);
     await tester.pumpAndSettle();
 
     expect(find.text('Restore your existing wallet'), findsOneWidget);
@@ -70,7 +68,6 @@ void main() {
 
     expect(find.text('Enter recovery phrase'), findsOneWidget);
 
-    // Invalid phrase: blocked with a message, never advances (spec T7).
     await tester.enterText(
       find.byType(TextField),
       'random pasted design words',
@@ -81,8 +78,6 @@ void main() {
     expect(find.textContaining('not valid'), findsOneWidget);
     expect(find.text('This is my wallet'), findsNothing);
 
-    // Valid phrase: advances and shows the address MetaMask would derive
-    // from the same words (spec T2).
     await tester.enterText(
       find.byType(TextField),
       'test test test test test test test test test test test junk',
@@ -102,10 +97,7 @@ void main() {
     tester,
   ) async {
     final router = AppRouter.create(initialLocation: '/unlock');
-
-    await tester.pumpWidget(
-      MaterialApp.router(theme: AppTheme.dark(), routerConfig: router),
-    );
+    await pumpLocalizedOnboarding(tester, router);
     await tester.pumpAndSettle();
 
     expect(find.text('Welcome back'), findsOneWidget);
@@ -128,16 +120,12 @@ void main() {
       ],
     );
 
-    await tester.pumpWidget(
-      MaterialApp.router(theme: AppTheme.dark(), routerConfig: router),
-    );
+    await pumpLocalizedOnboarding(tester, router);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Create new wallet'));
     await tester.pumpAndSettle();
 
-    // The phrase is random per run: scrape it off the backup grid so the
-    // verify step can be answered with the real words.
     final words = <int, String>{};
     for (final text in tester.widgetList<Text>(find.byType(Text))) {
       final match = RegExp(r'^(\d+)\.\s+([a-z]+)$').firstMatch(text.data ?? '');
@@ -148,7 +136,6 @@ void main() {
     await tester.tap(find.text('I saved these words'));
     await tester.pumpAndSettle();
 
-    // Verification asks for three random positions, typed not selected.
     final requested = <int>[];
     for (final text in tester.widgetList<Text>(find.byType(Text))) {
       final match = RegExp(r'^Word #(\d+)$').firstMatch(text.data ?? '');
@@ -156,7 +143,6 @@ void main() {
     }
     expect(requested.length, 3);
 
-    // A wrong word blocks the flow ('xxxxxx' is not a BIP-39 word)…
     await tester.enterText(
       find.byKey(ValueKey('verify-word-${requested.first}')),
       'xxxxxx',
@@ -167,14 +153,18 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Verify backup'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('does not match'), findsOneWidget);
+    expect(find.textContaining("didn't match"), findsOneWidget);
     expect(find.text('Create an app PIN'), findsNothing);
 
-    // …the real words advance to PIN setup.
-    await tester.enterText(
-      find.byKey(ValueKey('verify-word-${requested.first}')),
-      words[requested.first]!,
-    );
+    final retryRequested = <int>[];
+    for (final text in tester.widgetList<Text>(find.byType(Text))) {
+      final match = RegExp(r'^Word #(\d+)$').firstMatch(text.data ?? '');
+      if (match != null) retryRequested.add(int.parse(match.group(1)!));
+    }
+    expect(retryRequested.length, 3);
+    for (final n in retryRequested) {
+      await tester.enterText(find.byKey(ValueKey('verify-word-$n')), words[n]!);
+    }
     await tester.pump();
     await tester.tap(find.text('Verify backup'));
     await tester.pumpAndSettle();

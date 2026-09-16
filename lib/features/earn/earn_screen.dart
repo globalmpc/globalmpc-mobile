@@ -1,50 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:mpc_mining_app/core/theme/app_icons.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants/earn_facts.dart';
 import '../../core/localization/locale_controller.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/widgets/common_widgets.dart';
-import '../../core/widgets/glass_card.dart';
 
-/// Earn — MPC's planned staking + farming surface.
-///
-/// MPC is permissioned (ERC-3643) and pre-listing, so nothing here quotes a
-/// rate. Every capability is clearly labelled "Planned" and the reward figure
-/// reads "Announced at listing".
 class EarnScreen extends StatelessWidget {
   const EarnScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.tr('earn.title'))),
+      backgroundColor: context.palette.bg,
       body: SafeArea(
-        top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
           children: [
-            const _GatedBanner(),
-            const SizedBox(height: 20),
-            for (final program in EarnFacts.programs) ...[
-              _ProgramCard(program: program),
-              const SizedBox(height: 12),
-            ],
-            const SizedBox(height: 10),
-            SectionHeader(context.tr('earn.whyGated')),
-            const SizedBox(height: 12),
-            const _GatesCard(),
-            const SizedBox(height: 20),
-            Center(
-              child: Text(
-                context.tr('app.trust'),
-                style: TextStyle(
-                  color: context.palette.textLo,
-                  fontStyle: FontStyle.italic,
-                  fontSize: 13,
-                ),
+            const SizedBox(height: 16),
+            Text(
+              context.tr('earn.title'),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                height: 29 / 24,
+                color: context.palette.textHi,
               ),
             ),
+            const SizedBox(height: 16),
+            const _GatedBanner(),
+            const SizedBox(height: 16),
+            for (final program in EarnFacts.programs) ...[
+              _ProgramCard(program: program),
+              const SizedBox(height: 16),
+            ],
+            const SizedBox(height: 8),
+            Text(
+              context.tr('earn.whyGated'),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                height: 19 / 16,
+                color: context.palette.textHi,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const _GatesCard(),
           ],
         ),
       ),
@@ -57,23 +57,35 @@ class _GatedBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = context.palette;
+    final isLight = Theme.of(context).brightness == Brightness.light;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.info.withValues(alpha: 0.1),
+        color: isLight ? const Color(0xFFFDFEFF) : context.palette.surface,
+        border: Border.all(color: const Color(0xFF6E93C9)),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Icon(AppIcons.info_outline, size: 18, color: AppColors.info),
-          const SizedBox(width: 10),
+          const SizedBox(
+            width: 22,
+            child: Icon(
+              Icons.info_outline_rounded,
+              size: 22,
+              color: Color(0xFF4F75AE),
+            ),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               context.tr('earn.gatedBanner'),
-              style: TextStyle(color: p.textHi, fontSize: 13, height: 1.4),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                height: 15 / 12,
+                color: context.palette.textHi,
+              ),
             ),
           ),
         ],
@@ -82,98 +94,172 @@ class _GatedBanner extends StatelessWidget {
   }
 }
 
-class _ProgramCard extends StatelessWidget {
+class _ProgramCard extends StatefulWidget {
   const _ProgramCard({required this.program});
   final EarnProgramFact program;
 
   @override
+  State<_ProgramCard> createState() => _ProgramCardState();
+}
+
+class _ProgramCardState extends State<_ProgramCard> {
+  void _notify() {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFF50986B),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          content: Row(
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: Center(
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color(0xFFF1EBE5),
+                        width: 1.5,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.check_rounded,
+                        size: 12,
+                        color: Color(0xFFF1EBE5),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  context.tr('earn.notifyToast'),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    height: 16 / 13,
+                    color: Color(0xFFF7F3EE),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+  }
+
+  String get _iconAsset => switch (widget.program.id) {
+    'staking' => 'assets/icons/earn/staking.svg',
+    'farming' => 'assets/icons/earn/farming.svg',
+    _ => 'assets/icons/bottom-nav/trend-up.svg',
+  };
+
+  @override
   Widget build(BuildContext context) {
-    final p = context.palette;
-    return GlassCard(
-      padding: const EdgeInsets.all(18),
-      accent: p.accent,
+    return Container(
+      decoration: BoxDecoration(
+        color: context.palette.surface,
+        border: Border.all(color: context.palette.border),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: p.accent.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: Icon(_iconFor(program.id), size: 20, color: p.accent),
-              ),
-              const SizedBox(width: 12),
+              SvgPicture.asset(_iconAsset, width: 24, height: 24),
+              const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  context.tr('earn.${program.id}.title'),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+                  context.tr('earn.${widget.program.id}.title'),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    height: 19 / 16,
+                    color: context.palette.textHi,
                   ),
                 ),
               ),
-              Pill(context.tr('earn.status.planned'), color: AppColors.warning),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            context.tr('earn.${program.id}.body'),
-            style: TextStyle(color: p.textLo, fontSize: 13.5, height: 1.4),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: p.bg.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  context.tr('earn.rateLabel'),
-                  style: TextStyle(color: p.textLo, fontSize: 12.5),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                decoration: BoxDecoration(
+                  color: context.palette.pillAmberBg,
+                  borderRadius: BorderRadius.circular(999),
                 ),
-                const Spacer(),
-                Text(
-                  context.tr('earn.ratePending'),
-                  style: TextStyle(
-                    color: p.textHi,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
+                child: Text(
+                  context.tr('earn.status.planned'),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    height: 13 / 11,
+                    color: AppColors.copper,
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            context.tr('earn.${widget.program.id}.body'),
+            style: TextStyle(
+              fontSize: 12,
+              height: 15 / 12,
+              color: context.palette.textLo,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+          Text(
+            '${context.tr('earn.rateLabel')} • ${context.tr('earn.ratePending')}',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              height: 15 / 12,
+              color: context.palette.textHi,
+            ),
+          ),
+          const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => _notify(context),
-              icon: const Icon(AppIcons.notify, size: 18),
+              onPressed: _notify,
+              icon: SvgPicture.asset(
+                'assets/icons/earn/notification.svg',
+                width: 16,
+                height: 16,
+              ),
               label: Text(context.tr('earn.notify')),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: context.palette.bg,
+                foregroundColor: context.palette.textHi,
+                side: const BorderSide(color: AppColors.gold),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  height: 17 / 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
   }
-
-  void _notify(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(context.tr('earn.notifyToast'))));
-  }
-
-  IconData _iconFor(String id) => switch (id) {
-    'staking' => AppIcons.staking,
-    'farming' => AppIcons.farming,
-    _ => AppIcons.earn_outlined,
-  };
 }
 
 class _GatesCard extends StatelessWidget {
@@ -181,14 +267,19 @@ class _GatesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = context.palette;
-    return GlassCard(
+    return Container(
+      decoration: BoxDecoration(
+        color: context.palette.surface,
+        border: Border.all(color: context.palette.border),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      padding: const EdgeInsets.all(16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (var i = 0; i < EarnFacts.gates.length; i++) ...[
+            if (i > 0) const SizedBox(height: 20),
             _GateRow(gate: EarnFacts.gates[i]),
-            if (i != EarnFacts.gates.length - 1)
-              Divider(color: p.border, height: 22),
           ],
         ],
       ),
@@ -202,44 +293,28 @@ class _GateRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final p = context.palette;
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: p.primary.withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(10),
+        Text(
+          context.tr('earn.gate.${gate.id}.title'),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            height: 17 / 14,
+            color: context.palette.textHi,
           ),
-          alignment: Alignment.center,
-          child: Icon(_iconFor(gate.id), size: 17, color: p.primary),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.tr('earn.gate.${gate.id}.title'),
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                context.tr('earn.gate.${gate.id}.body'),
-                style: TextStyle(color: p.textLo, fontSize: 12.5, height: 1.35),
-              ),
-            ],
+        const SizedBox(height: 8),
+        Text(
+          context.tr('earn.gate.${gate.id}.body'),
+          style: TextStyle(
+            fontSize: 12,
+            height: 15 / 12,
+            color: context.palette.textLo,
           ),
         ),
       ],
     );
   }
-
-  IconData _iconFor(String id) => switch (id) {
-    'kyc' => AppIcons.kyc,
-    'listing' => AppIcons.listing,
-    _ => AppIcons.info_outline,
-  };
 }

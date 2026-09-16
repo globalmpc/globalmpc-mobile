@@ -58,7 +58,7 @@ class AppTheme {
       colorScheme: ColorScheme(
         brightness: brightness,
         primary: p.primary,
-        onPrimary: const Color(0xFF241703),
+        onPrimary: p.onPrimary,
         secondary: p.accent,
         onSecondary: Colors.white,
         surface: p.surface,
@@ -88,7 +88,7 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: p.primary,
-          foregroundColor: const Color(0xFF241703),
+          foregroundColor: p.onPrimary,
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
           minimumSize: const Size(0, 50),
           shape: RoundedRectangleBorder(
