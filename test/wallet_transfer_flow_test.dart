@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mpc_mining_app/core/localization/app_strings.dart';
+import 'package:mpc_mining_app/core/localization/locale_controller.dart';
 import 'package:mpc_mining_app/core/theme/app_theme.dart';
 import 'package:mpc_mining_app/data/models/mining_project.dart';
 import 'package:mpc_mining_app/data/models/wallet_models.dart';
 import 'package:mpc_mining_app/data/repositories/mpc_repository.dart';
 import 'package:mpc_mining_app/features/wallet/wallet_provider.dart';
-import 'package:mpc_mining_app/features/wallet/wallet_transfer_screens.dart';
+import 'package:mpc_mining_app/features/transfer/receive_screen.dart';
+import 'package:mpc_mining_app/features/transfer/send_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,10 +29,16 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     final provider = WalletProvider(const _ImmediateWalletRepository());
     provider.load();
+    final prefs = await SharedPreferences.getInstance();
+    final locale = LocaleController(prefs);
+    await locale.setLanguage(AppLanguage.en);
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: provider,
-        child: MaterialApp(theme: AppTheme.light(), home: child),
+      LocaleControllerScope.provide(
+        controller: locale,
+        child: ChangeNotifierProvider.value(
+          value: provider,
+          child: MaterialApp(theme: AppTheme.light(), home: child),
+        ),
       ),
     );
     await tester.pump();
@@ -42,8 +51,8 @@ void main() {
 
     expect(find.text('Receive MPC'), findsOneWidget);
     expect(find.text('BNB Smart Chain'), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Share'), findsOneWidget);
+    expect(find.text('Copy address'), findsOneWidget);
+    expect(find.text('Share address'), findsOneWidget);
     expect(find.byType(SelectableText), findsOneWidget);
   });
 
@@ -59,10 +68,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Enter a valid BNB Smart Chain address.'), findsOneWidget);
-    expect(
-      find.text('You do not have enough unallocated MPC.'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('unallocated MPC'), findsOneWidget);
   });
 
   testWidgets('send advances through review, PIN and success', (tester) async {
@@ -88,10 +94,10 @@ void main() {
     await tester.tap(find.text('Send MPC'));
     await tester.pump();
 
-    expect(find.text('Submitting securely'), findsOneWidget);
+    expect(find.text('Processing transaction'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 1500));
     await tester.pump();
-    expect(find.text('Transaction submitted'), findsOneWidget);
+    expect(find.text('Transaction Submitted'), findsOneWidget);
     expect(find.text('Pending confirmation'), findsOneWidget);
   });
 
@@ -103,10 +109,16 @@ void main() {
       const _ImmediateWalletRepository(bnbBalance: 0.00003),
     );
     provider.load();
+    final prefs = await SharedPreferences.getInstance();
+    final locale = LocaleController(prefs);
+    await locale.setLanguage(AppLanguage.en);
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: provider,
-        child: MaterialApp(theme: AppTheme.light(), home: const SendScreen()),
+      LocaleControllerScope.provide(
+        controller: locale,
+        child: ChangeNotifierProvider.value(
+          value: provider,
+          child: MaterialApp(theme: AppTheme.light(), home: const SendScreen()),
+        ),
       ),
     );
     await tester.pump();

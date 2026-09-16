@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mpc_mining_app/core/theme/app_icons.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/localization/locale_controller.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/common_widgets.dart';
-import '../../../core/widgets/glass_card.dart';
-import '../../../core/widgets/mining_hero_art.dart';
 import '../../../data/models/mining_project.dart';
-import 'pipeline_widgets.dart';
 
 class ProjectCard extends StatelessWidget {
   const ProjectCard({super.key, required this.project, required this.onTap});
@@ -17,109 +13,128 @@ class ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final featured = project.featured;
     final p = context.palette;
-    final stageColor = _stageColor(context, project.stage);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return GlassCard(
+    return GestureDetector(
       onTap: onTap,
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _Glyph(project: project),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.tr(project.nameKey),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Row(
-                      children: [
-                        Icon(
-                          AppIcons.place_outlined,
-                          size: 13,
-                          color: p.textLo,
-                        ),
-                        const SizedBox(width: 3),
-                        Expanded(
-                          child: Text(
-                            context.tr(project.location),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: p.textLo, fontSize: 12.5),
+      child: Container(
+        decoration: BoxDecoration(
+          color: p.surface,
+          border: Border.all(color: p.border),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: SizedBox(
+                width: double.infinity,
+                height: 110,
+                child: featured
+                    ? Container(
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0xFFF7BA52), Color(0xFFC74F1F)],
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                        child: SvgPicture.asset(
+                          'assets/icons/projects/mountain.svg',
+                          width: 44,
+                        ),
+                      )
+                    : Container(
+                        alignment: Alignment.center,
+                        color: isDark
+                            ? AppColors.darkSurfaceHi
+                            : const Color(0xFFF4F0EB),
+                        child: SvgPicture.asset(
+                          'assets/icons/projects/mountain.svg',
+                          width: 44,
+                          colorFilter: const ColorFilter.mode(
+                            AppColors.gold,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
               ),
-              Pill(context.tr(project.stage.key), color: stageColor),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              for (final c in project.commodities)
-                Pill(
-                  context.tr(c),
-                  color: p.accent,
-                  icon: AppIcons.diamond_outlined,
-                ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Text(
-                context.tr('proj.pipeline'),
-                style: TextStyle(color: p.textLo, fontSize: 12.5),
+            ),
+            const SizedBox(height: 8),
+
+            Text(
+              context.tr(project.nameKey),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: p.textHi,
+                height: 21 / 17,
               ),
-              const Spacer(),
-              PipelineDots(pipeline: project.pipeline),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 8),
+
+            Row(
+              children: [
+                _Pill(
+                  label: context.tr(project.location),
+                  bg: isDark ? AppColors.darkBorder : const Color(0xFFF4F0EB),
+                  textColor: p.textLo,
+                ),
+                const SizedBox(width: 8),
+                _Pill(
+                  label: context.tr(project.stage.key),
+                  bg: isDark
+                      ? AppColors.darkWarningFill
+                      : const Color(0xFFFFEDC1),
+                  textColor: AppColors.copper,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            Text(
+              project.commodities.map((k) => context.tr(k)).join(' · '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12, color: p.textLo, height: 15 / 12),
+            ),
+          ],
+        ),
       ),
     );
   }
-
-  Color _stageColor(BuildContext context, ProjectStage stage) {
-    final p = context.palette;
-    return switch (stage) {
-      ProjectStage.inDiscussion => p.accent,
-      ProjectStage.secured => AppColors.positive,
-      ProjectStage.toBeSecured => p.accent,
-      ProjectStage.comingSoon => p.textLo,
-    };
-  }
 }
 
-class _Glyph extends StatelessWidget {
-  const _Glyph({required this.project});
-  final MiningProject project;
+class _Pill extends StatelessWidget {
+  const _Pill({required this.label, required this.bg, required this.textColor});
+
+  final String label;
+  final Color bg;
+  final Color textColor;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: 46,
-        height: 46,
-        child: MiningHeroArt(compact: true, kind: project.artKind),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+          height: 13 / 11,
+        ),
       ),
     );
   }

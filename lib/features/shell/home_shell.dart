@@ -36,8 +36,9 @@ class HomeShell extends StatelessWidget {
         ),
         child: SafeArea(
           top: false,
-          child: SizedBox(
+          child: Container(
             height: 60,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
                 _NavItem(
@@ -46,18 +47,22 @@ class HomeShell extends StatelessWidget {
                   selected: index == 0,
                   onTap: () => _go(0),
                 ),
+                const SizedBox(width: 12),
                 _NavItem(
                   asset: 'projects',
                   label: context.tr('nav.projects'),
                   selected: index == 1,
                   onTap: () => _go(1),
+                  iconSize: 20,
                 ),
+                const SizedBox(width: 12),
                 _NavItem(
                   asset: 'trend-up',
                   label: context.tr('nav.earn'),
                   selected: index == 2,
                   onTap: () => _go(2),
                 ),
+                const SizedBox(width: 12),
                 _NavItem(
                   asset: 'wallet',
                   label: context.tr('nav.wallet'),
@@ -86,6 +91,7 @@ class _NavItem extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.iconSize = 16,
   });
 
   /// Icon name under `assets/icons/bottom-nav/`.
@@ -94,51 +100,53 @@ class _NavItem extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
+  final double iconSize;
+
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
-    final color = selected ? AppColors.amber : p.textLo;
+    final iconColor = selected ? p.navActiveIcon : p.navInactive;
+    final labelColor = selected ? p.navActiveLabel : p.navInactive;
 
     return Expanded(
       child: InkWell(
         onTap: onTap,
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
+        borderRadius: BorderRadius.circular(100),
         // The active pill wraps the icon AND the label together (Figma),
         // not the icon alone.
-        child: Center(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-            decoration: BoxDecoration(
-              color: selected
-                  ? AppColors.gold.withValues(alpha: 0.18)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SvgPicture.asset(
-                  'assets/icons/bottom-nav/$asset.svg',
-                  width: 20,
-                  height: 20,
-                  colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.fromLTRB(0, 4, 0, 6),
+          decoration: BoxDecoration(
+            color: selected ? p.navActiveFill : Colors.transparent,
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                'assets/icons/bottom-nav/$asset.svg',
+                width: iconSize,
+                height: iconSize,
+                colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: labelColor,
+                  fontSize: 10,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  height: 12 / 10,
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 10,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                    height: 1.1,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
