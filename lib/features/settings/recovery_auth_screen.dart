@@ -401,7 +401,9 @@ class _RecoveryAuthScreenState extends State<RecoveryAuthScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () => context.go('/wallet'),
+              onPressed: () => context.canPop()
+                  ? context.pop()
+                  : context.go('/settings/recovery'),
               child: Text(
                 context.tr('settings.reveal.writtenDown'),
                 style: const TextStyle(

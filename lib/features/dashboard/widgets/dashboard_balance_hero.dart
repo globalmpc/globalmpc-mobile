@@ -197,26 +197,31 @@ class _BalanceHeroState extends State<DashboardBalanceHero> {
                           ],
                         ),
                         const Spacer(),
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => context.go('/wallet'),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    context.tr('dash.balance'),
-                                    style: const TextStyle(
-                                      color: Color(0xFFE8E0D8),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  context.tr('dash.balance'),
+                                  style: const TextStyle(
+                                    color: Color(0xFFE8E0D8),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                  const SizedBox(width: 3),
-                                  GestureDetector(
-                                    onTap: () =>
-                                        setState(() => _hidden = !_hidden),
+                                ),
+                                GestureDetector(
+                                  key: const Key('balance-visibility-toggle'),
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () =>
+                                      setState(() => _hidden = !_hidden),
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      3,
+                                      6,
+                                      8,
+                                      6,
+                                    ),
                                     child: Icon(
                                       _hidden
                                           ? Icons.visibility_off_outlined
@@ -225,36 +230,35 @@ class _BalanceHeroState extends State<DashboardBalanceHero> {
                                       color: const Color(0xFFE8E0D8),
                                     ),
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                balance,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.displaySmall
-                                    ?.copyWith(
-                                      color: AppColors.darkTextHi,
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.w700,
-                                      height: 1,
-                                      letterSpacing: -1.6,
-                                    ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                '${context.tr('wallet.allocations')} $allocated  ·  '
-                                '${context.tr('wallet.unallocated')} $free',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Color(0xFFD8D0C8),
-                                  fontSize: 11,
                                 ),
+                              ],
+                            ),
+                            Text(
+                              balance,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.displaySmall
+                                  ?.copyWith(
+                                    color: AppColors.darkTextHi,
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1,
+                                    letterSpacing: -1.6,
+                                  ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '${context.tr('wallet.allocations')} $allocated  ·  '
+                              '${context.tr('wallet.unallocated')} $free',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Color(0xFFD8D0C8),
+                                fontSize: 11,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 24),
                         Row(
