@@ -150,7 +150,7 @@ class SendResultStep extends StatelessWidget {
           ),
           const Spacer(),
           FilledButton(
-            onPressed: () => context.go('/wallet'),
+            onPressed: () => context.pushReplacement('/wallet/transactions'),
             style: buttonStyle,
             child: Text(context.tr('send.success.view')),
           ),

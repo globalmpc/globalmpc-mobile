@@ -117,7 +117,8 @@ class _SendScreenState extends State<SendScreen> {
                     onTap: () => setState(() => _step = _SendStep.review),
                   ),
                   _SendStep.success => _circleBackButton(
-                    onTap: () => context.go('/wallet'),
+                    onTap: () =>
+                        context.canPop() ? context.pop() : context.go('/'),
                   ),
                   _ => null,
                 },
