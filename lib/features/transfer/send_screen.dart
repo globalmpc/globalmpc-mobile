@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:web3dart/web3dart.dart' show EthereumAddress;
 
 import '../../core/localization/locale_controller.dart';
 import '../../core/security/wallet_key_service.dart';
@@ -32,8 +33,11 @@ class SendScreen extends StatefulWidget {
 
 enum _SendStep { details, review, pin, processing, success, failure }
 
+/// Why a send did not happen. Each reason gets its own explanation because
+/// the fixes differ: restore the wallet, top up BNB, or simply retry.
+enum _FailureReason { keyUnavailable, gas, network }
+
 class _SendScreenState extends State<SendScreen> {
-  static const _networkFee = 0.00012;
   static const _previewLowGas = bool.fromEnvironment('MPC_PREVIEW_LOW_GAS');
   static const _previewReviewOnly = bool.fromEnvironment(
     'MPC_PREVIEW_REVIEW_ONLY',
@@ -46,8 +50,15 @@ class _SendScreenState extends State<SendScreen> {
   String? _addressError;
   String? _amountError;
   String? _pinError;
-  Timer? _timer;
   bool _previewScheduled = false;
+
+  FeeEstimate? _fee;
+  bool _feeUnavailable = false;
+  int _estimateSequence = 0;
+
+  String? _txHash;
+  TxStatus _txStatus = TxStatus.submitted;
+  _FailureReason? _failure;
 
   @override
   void initState() {
@@ -62,12 +73,13 @@ class _SendScreenState extends State<SendScreen> {
       ? context.read<WalletProvider>().state.data
       : null;
 
+  BscChainService get _chain => context.read<BscChainService>();
+
   double get _amountValue =>
       double.tryParse(_amount.text.trim().replaceAll(',', '')) ?? 0;
 
   @override
   void dispose() {
-    _timer?.cancel();
     _address.dispose();
     _amount.dispose();
     _pin.dispose();
@@ -79,6 +91,7 @@ class _SendScreenState extends State<SendScreen> {
   Widget build(BuildContext context) {
     context.watch<WalletProvider>();
     _scheduleLowGasPreview();
+    final networkLabel = _chain.config.networkLabel;
     return PopScope(
       canPop: _step == _SendStep.details || _step == _SendStep.success,
       onPopInvokedWithResult: (didPop, _) {
@@ -97,12 +110,7 @@ class _SendScreenState extends State<SendScreen> {
         appBar: _step == _SendStep.processing
             ? null
             : AppBar(
-                centerTitle:
-                    _step == _SendStep.review ||
-                    _step == _SendStep.details ||
-                    _step == _SendStep.pin ||
-                    _step == _SendStep.failure ||
-                    _step == _SendStep.success,
+                centerTitle: true,
                 leading: switch (_step) {
                   _SendStep.details => _circleBackButton(
                     onTap: () => Navigator.maybePop(context),
@@ -135,12 +143,15 @@ class _SendScreenState extends State<SendScreen> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             child: switch (_step) {
-              _SendStep.details => _details(),
+              _SendStep.details => _details(networkLabel),
               _SendStep.review => SendReviewStep(
                 amount: _amountValue,
                 recipientAddress: _address.text,
                 bnbBalance: _wallet!.bnbBalance,
-                networkFee: _networkFee,
+                networkFee: _fee?.feeBnb,
+                feeUnavailable: _feeUnavailable,
+                networkLabel: networkLabel,
+                onRetryFee: _estimateFee,
                 onConfirm: _continueFromReview,
                 onEdit: () => setState(() => _step = _SendStep.details),
               ),
@@ -150,12 +161,27 @@ class _SendScreenState extends State<SendScreen> {
                 success: true,
                 amount: _amountValue,
                 recipientAddress: _address.text,
+                networkLabel: networkLabel,
+                txHash: _txHash,
+                txStatus: _txStatus,
+                explorerUrl: _txHash == null
+                    ? null
+                    : _chain.config.explorerTxUrl(_txHash!),
               ),
               _SendStep.failure => SendResultStep(
                 success: false,
                 amount: _amountValue,
                 recipientAddress: _address.text,
-                onRetry: () => setState(() => _step = _SendStep.review),
+                networkLabel: networkLabel,
+                failureMessage: context.tr(switch (_failure) {
+                  _FailureReason.keyUnavailable =>
+                    'send.failure.keyUnavailable',
+                  _FailureReason.gas => 'send.failure.gas',
+                  _ => 'send.failure.body',
+                }),
+                onRetry: _failure == _FailureReason.keyUnavailable
+                    ? null
+                    : () => setState(() => _step = _SendStep.review),
               ),
             },
           ),
@@ -170,6 +196,7 @@ class _SendScreenState extends State<SendScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       setState(() => _step = _SendStep.review);
+      unawaited(_estimateFee());
       if (_previewReviewOnly) return;
       await Future<void>.delayed(const Duration(milliseconds: 120));
       if (mounted) await _continueFromReview();
@@ -202,7 +229,7 @@ class _SendScreenState extends State<SendScreen> {
     ),
   );
 
-  Widget _details() {
+  Widget _details(String networkLabel) {
     final wallet = _wallet;
     if (wallet == null) {
       return StateMessage(
@@ -212,11 +239,21 @@ class _SendScreenState extends State<SendScreen> {
         onRetry: context.read<WalletProvider>().load,
       );
     }
+    if (!_chain.config.hasToken) {
+      return StateMessage(
+        icon: AppIcons.info_outline,
+        title: context.tr('send.tokenNotConfigured.title'),
+        message: context
+            .tr('send.tokenNotConfigured.body')
+            .replaceFirst('{network}', networkLabel),
+      );
+    }
     final available = (wallet.mpcBalance - wallet.allocatedTotal)
         .clamp(0, double.infinity)
         .toDouble();
     return SendDetailsForm(
       available: available,
+      networkLabel: networkLabel,
       addressController: _address,
       amountController: _amount,
       addressError: _addressError,
@@ -234,8 +271,35 @@ class _SendScreenState extends State<SendScreen> {
     );
   }
 
+  /// Prices the transfer for the review step. Sequenced so a stale answer
+  /// from an earlier recipient or amount can never overwrite a newer one.
+  Future<void> _estimateFee() async {
+    final wallet = _wallet;
+    if (wallet == null) return;
+    final sequence = ++_estimateSequence;
+    final chain = _chain;
+    setState(() {
+      _fee = null;
+      _feeUnavailable = false;
+    });
+    try {
+      final fee = await chain.estimateTransferFee(
+        from: wallet.address,
+        to: _address.text.trim(),
+        amountMpc: _amountValue,
+      );
+      if (!mounted || sequence != _estimateSequence) return;
+      setState(() => _fee = fee);
+    } catch (_) {
+      if (!mounted || sequence != _estimateSequence) return;
+      setState(() => _feeUnavailable = true);
+    }
+  }
+
   Future<void> _continueFromReview() async {
-    if (_wallet!.bnbBalance >= _networkFee) {
+    final fee = _fee;
+    if (fee == null) return;
+    if (_wallet!.bnbBalance >= fee.feeBnb) {
       setState(() => _step = _SendStep.pin);
       return;
     }
@@ -244,7 +308,7 @@ class _SendScreenState extends State<SendScreen> {
       isScrollControlled: true,
       showDragHandle: true,
       builder: (sheetContext) => SendInsufficientGasSheet(
-        networkFee: _networkFee,
+        networkFee: fee.feeBnb,
         bnbBalance: _wallet!.bnbBalance,
       ),
     );
@@ -285,6 +349,22 @@ class _SendScreenState extends State<SendScreen> {
     ),
   );
 
+  /// A mixed-case address carries its own checksum. Accepting one that fails
+  /// it would send funds to whatever the typo resolves to, so it is rejected
+  /// here rather than left to the chain.
+  static bool _checksumValid(String address) {
+    final body = address.substring(2);
+    final mixedCase =
+        body.contains(RegExp('[a-f]')) && body.contains(RegExp('[A-F]'));
+    if (!mixedCase) return true;
+    try {
+      EthereumAddress.fromHex(address, enforceEip55: true);
+      return true;
+    } on ArgumentError {
+      return false;
+    }
+  }
+
   void _validateDetails() {
     final address = _address.text.trim();
     final available = (_wallet!.mpcBalance - _wallet!.allocatedTotal).clamp(
@@ -297,6 +377,8 @@ class _SendScreenState extends State<SendScreen> {
       addressError = context.tr('send.error.address');
     } else if (address.toLowerCase() == _wallet!.address.toLowerCase()) {
       addressError = context.tr('send.error.self');
+    } else if (!_checksumValid(address)) {
+      addressError = context.tr('send.error.checksum');
     }
     if (_amountValue <= 0) {
       amountError = context.tr('send.error.zero');
@@ -312,6 +394,9 @@ class _SendScreenState extends State<SendScreen> {
         _step = _SendStep.review;
       }
     });
+    if (addressError == null && amountError == null) {
+      unawaited(_estimateFee());
+    }
   }
 
   Future<void> _pasteAddress() async {
@@ -342,26 +427,51 @@ class _SendScreenState extends State<SendScreen> {
     final mnemonic = await WalletSessionStore.instance.readMnemonic();
     if (!mounted) return;
     if (mnemonic == null) {
-      _timer = Timer(const Duration(milliseconds: 1400), () {
-        if (!mounted) return;
-        setState(() => _step = _SendStep.success);
+      // A PIN without a stored key means the vault is incomplete on this
+      // device. Nothing can be signed, so nothing is presented as sent.
+      setState(() {
+        _failure = _FailureReason.keyUnavailable;
+        _step = _SendStep.failure;
       });
       return;
     }
 
+    final chain = _chain;
     try {
-      final chain = context.read<BscChainService>();
-      await chain.sendMpc(
+      final hash = await chain.sendMpc(
         credentials: const WalletKeyService().deriveKey(mnemonic),
         to: _address.text.trim(),
         amountMpc: _amountValue,
       );
       if (!mounted) return;
       context.read<WalletProvider>().load();
-      setState(() => _step = _SendStep.success);
+      setState(() {
+        _txHash = hash;
+        _txStatus = TxStatus.submitted;
+        _step = _SendStep.success;
+      });
+      unawaited(_trackReceipt(chain, hash));
+    } on InsufficientGasException {
+      if (!mounted) return;
+      setState(() {
+        _failure = _FailureReason.gas;
+        _step = _SendStep.failure;
+      });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _step = _SendStep.failure);
+      setState(() {
+        _failure = _FailureReason.network;
+        _step = _SendStep.failure;
+      });
+    }
+  }
+
+  Future<void> _trackReceipt(BscChainService chain, String hash) async {
+    final status = await chain.waitForReceipt(hash);
+    if (!mounted || _txHash != hash) return;
+    setState(() => _txStatus = status);
+    if (status != TxStatus.pending) {
+      context.read<WalletProvider>().load();
     }
   }
 }

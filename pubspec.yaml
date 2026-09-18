@@ -1,7 +1,7 @@
 name: mpc_mining_app
 description: "MPC Wallet — non-custodial wallet for the MPC mining-tokenization ecosystem. Browse tokenized mining projects, hold MPC, track your position."
 publish_to: 'none'
-version: 0.1.0+4
+version: 0.1.0+5
 
 environment:
   sdk: ^3.11.3

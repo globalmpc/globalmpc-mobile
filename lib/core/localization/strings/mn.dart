@@ -112,7 +112,6 @@ final Map<String, String> mnStrings = {
   'dash.network': 'Сүлжээ',
   'dash.listing': 'Бүртгэл',
   'dash.issuer': 'Гаргагч',
-  'dash.contract': 'Гэрээ',
   'onboard.badge': 'ХАДГАЛАМЖГҮЙ ХЭТЭВЧ',
   'onboard.headline': 'Хэтэвчээ өөрөө эзэмш,\nбаталгааг шалга.',
   'onboard.subhead':
@@ -121,7 +120,6 @@ final Map<String, String> mnStrings = {
   'onboard.import': 'Хэтэвч импортлох',
   'dash.addressLoading': 'Хэтэвчийг ачаалж байна…',
   'dash.addressUnavailable': 'Хэтэвч боломжгүй',
-  'dash.explorer': 'Explorer',
   'tour.balance.title': 'Таны үлдэгдэл',
   'tour.balance.body':
       'MPC-ээ эндээс хянаарай. Дүнг нуухын тулд нүд дээр дарна уу.',
@@ -158,13 +156,11 @@ final Map<String, String> mnStrings = {
   'proj.partners': 'Баталгаажуулалтын сүлжээ',
   'proj.orchestrationNote':
       'MPC эдгээр байгууллагыг ажиллуулдаггүй, гэрээ тус бүрээр даалгадаг. Төлөв нь өнөөгийн байдлыг харуулна.',
-  'proj.contract': 'Гэрээ',
   'proj.tokenStandard': 'Гаргалтын стандарт (төлөвлөсөн)',
   'proj.overall': 'Нийт',
   'proj.allocatedSupply': 'Хуваарилсан нийлүүлэлт',
   'proj.hold': 'Энэ хөрөнгийг хадгалах',
   'proj.notOpen': 'Хараахан нээгдээгүй',
-  'proj.viewExplorer': 'Блок эксплорер дээр үзэх',
   'proj.notFound': 'Төсөл олдсонгүй',
   'proj.betaHold': 'Хадгалах урсгал энэ бета хувилбарт хараахан ороогүй байна.',
 

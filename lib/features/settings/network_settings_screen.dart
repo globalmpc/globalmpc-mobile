@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../core/constants/chain_config.dart';
-import '../../core/constants/mpc_facts.dart';
+import '../../core/config/app_environment.dart';
 import '../../core/localization/locale_controller.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/utils/formatters.dart';
 import '../../core/widgets/common_widgets.dart';
 import '../../core/widgets/glass_card.dart';
-import '../web/web_view_screen.dart';
 import 'settings_widgets.dart';
 
 class NetworkSettingsScreen extends StatelessWidget {
@@ -16,6 +12,7 @@ class NetworkSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chain = AppEnvironment.current.chain;
     return SimpleSettingsPage(
       title: context.tr('dash.network'),
       children: [
@@ -30,7 +27,7 @@ class NetworkSettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               Text(
-                MpcFacts.network,
+                chain.networkLabel,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
@@ -40,29 +37,10 @@ class NetworkSettingsScreen extends StatelessWidget {
               Text(
                 context
                     .tr('settings.security.chainNote')
-                    .replaceFirst(
-                      '{chainId}',
-                      '${ChainConfig.bscTestnet.chainId}',
-                    ),
+                    .replaceFirst('{chainId}', '${chain.chainId}'),
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 16),
-        SettingsGroup(
-          children: [
-            SettingRow(
-              label: context.tr('settings.security.contract'),
-              value: Fmt.shortAddress(MpcFacts.contractAddress),
-              onTap: () => context.push(
-                '/webview',
-                extra: WebViewArgs(
-                  url: MpcFacts.explorerTokenUrl,
-                  title: context.tr('settings.security.contract'),
-                ),
-              ),
-            ),
-          ],
         ),
       ],
     );

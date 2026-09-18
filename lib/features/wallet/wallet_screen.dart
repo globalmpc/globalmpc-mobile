@@ -186,7 +186,17 @@ class _WalletBody extends StatelessWidget {
                     : null,
               ),
               const SizedBox(height: 12),
-              if (account.transactions.isEmpty)
+              if (account.historyUnavailable)
+                GlassCard(
+                  child: StateMessage(
+                    icon: AppIcons.cloud_off_outlined,
+                    title: context.tr('wallet.historyUnavailable'),
+                    message: context.tr('wallet.historyUnavailableBody'),
+                    onRetry: context.read<WalletProvider>().load,
+                    contentWidth: 250,
+                  ),
+                )
+              else if (account.transactions.isEmpty)
                 GlassCard(
                   child: StateMessage(
                     icon: AppIcons.inbox_outlined,

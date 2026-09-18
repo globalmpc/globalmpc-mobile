@@ -10,6 +10,7 @@ import '../../features/onboarding/splash_screen.dart';
 import '../../features/onboarding/unlock_screen.dart';
 import '../../features/projects/project_detail_screen.dart';
 import '../../features/projects/projects_screen.dart';
+import '../../features/registry/registry_screen.dart';
 import '../../features/settings/profile_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/shell/home_shell.dart';
@@ -173,6 +174,11 @@ class AppRouter {
           path: '/profile',
           parentNavigatorKey: _rootKey,
           builder: (_, __) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/registry',
+          parentNavigatorKey: _rootKey,
+          builder: (_, __) => const RegistryScreen(),
         ),
         GoRoute(
           path: '/webview',

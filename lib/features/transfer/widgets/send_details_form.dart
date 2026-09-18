@@ -12,6 +12,7 @@ class SendDetailsForm extends StatelessWidget {
   const SendDetailsForm({
     super.key,
     required this.available,
+    required this.networkLabel,
     required this.addressController,
     required this.amountController,
     required this.addressError,
@@ -24,6 +25,9 @@ class SendDetailsForm extends StatelessWidget {
   });
 
   final double available;
+
+  /// Name of the network the transfer is signed against.
+  final String networkLabel;
   final TextEditingController addressController;
   final TextEditingController amountController;
   final String? addressError;
@@ -112,7 +116,7 @@ class SendDetailsForm extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'BNB Smart Chain',
+                            networkLabel,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(

@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/config/app_environment.dart';
 import '../../core/localization/locale_controller.dart';
-import '../../core/constants/mpc_facts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_icons.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/common_widgets.dart';
 import '../../data/models/wallet_models.dart';
-import '../../data/services/bsc_chain_service.dart';
 import '../wallet/wallet_provider.dart';
 import '../web/web_view_screen.dart';
 
@@ -18,14 +17,14 @@ class TransactionDetailScreen extends StatelessWidget {
 
   final WalletTransaction transaction;
 
-  String _explorerTxUrl(BuildContext context) {
-    final wallet = context.read<WalletProvider?>()?.state.data;
-    final chain = context.read<BscChainService?>();
-    if (wallet != null && !wallet.isDemo && chain != null) {
-      return chain.config.explorerTxUrl(transaction.hash);
-    }
-    return '${MpcFacts.explorerBase}/tx/${transaction.hash}';
-  }
+  String get _explorerTxUrl =>
+      AppEnvironment.current.chain.explorerTxUrl(transaction.hash);
+
+  /// Network the transaction lives on: the wallet's own label when a wallet
+  /// is loaded, otherwise the configured network.
+  String _networkLabel(BuildContext context) =>
+      context.read<WalletProvider?>()?.state.data?.network ??
+      AppEnvironment.current.chain.networkLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +63,8 @@ class TransactionDetailScreen extends StatelessWidget {
           ? () => context.push(
               '/webview',
               extra: WebViewArgs(
-                url: _explorerTxUrl(context),
-                title: 'BscScan',
+                url: _explorerTxUrl,
+                title: context.tr('send.success.explorer'),
               ),
             )
           : null,
@@ -168,7 +167,7 @@ class TransactionDetailScreen extends StatelessWidget {
                   bold: true,
                 ),
                 divider,
-                detailRow(context.tr('dash.network'), MpcFacts.network),
+                detailRow(context.tr('dash.network'), _networkLabel(context)),
                 divider,
                 detailRow(
                   context.tr('tx.details.hash'),

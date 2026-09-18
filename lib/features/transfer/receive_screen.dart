@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../core/config/app_environment.dart';
 import '../../core/localization/locale_controller.dart';
-import '../../core/constants/mpc_facts.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_icons.dart';
 import '../../core/widgets/wallet_error_state.dart';
@@ -24,6 +24,7 @@ class ReceiveScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<WalletProvider>().state;
     final p = context.palette;
+    final networkLabel = AppEnvironment.current.chain.networkLabel;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -82,7 +83,8 @@ class ReceiveScreen extends StatelessWidget {
               Text(
                 context
                     .tr('receive.warning')
-                    .replaceFirst('{asset}', assetSymbol),
+                    .replaceFirst('{asset}', assetSymbol)
+                    .replaceFirst('{network}', networkLabel),
                 style: TextStyle(fontSize: 13, color: p.textLo),
               ),
               const SizedBox(height: 12),
@@ -102,9 +104,9 @@ class ReceiveScreen extends StatelessWidget {
                     const SizedBox(height: 34),
                     Column(
                       children: [
-                        const Text(
-                          MpcFacts.network,
-                          style: TextStyle(
+                        Text(
+                          networkLabel,
+                          style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppColors.info,
@@ -137,6 +139,7 @@ class ReceiveScreen extends StatelessWidget {
                                 text: context
                                     .tr('receive.shareTemplate')
                                     .replaceFirst('{asset}', assetSymbol)
+                                    .replaceFirst('{network}', networkLabel)
                                     .replaceFirst(
                                       '{address}',
                                       state.data!.address,

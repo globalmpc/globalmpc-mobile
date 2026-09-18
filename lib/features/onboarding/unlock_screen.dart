@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/localization/locale_controller.dart';
 import '../../core/notifications/notification_center.dart';
 import '../../core/security/biometric_auth.dart';
 import '../../core/security/wallet_lock_controller.dart';
@@ -12,33 +13,45 @@ import 'widgets/unlock_pin_panel.dart';
 import 'widgets/unlock_dialogs.dart';
 
 class UnlockScreen extends StatefulWidget {
-  const UnlockScreen({super.key});
+  const UnlockScreen({super.key, @visibleForTesting this.biometrics});
+
+  /// Test seam; production always uses the platform implementation.
+  final BiometricAuth? biometrics;
 
   @override
   State<UnlockScreen> createState() => _UnlockScreenState();
 }
 
 class _UnlockScreenState extends State<UnlockScreen> {
+  /// Delay between the first frame and the automatic prompt, so the route
+  /// transition has finished and the window is fully in front before the
+  /// system UI is asked for.
+  static const _autoPromptDelay = Duration(milliseconds: 350);
+
   final _pin = TextEditingController();
-  final _biometrics = BiometricAuth();
+  late final BiometricAuth _biometrics = widget.biometrics ?? BiometricAuth();
   bool _busy = false;
   bool _promptShowing = false;
+  int _promptSequence = 0;
   bool _biometricSheetOpen = false;
   bool _restoreSheetOpen = false;
   String? _error;
   Duration? _lockout;
   Duration? _lockoutTotal;
   Timer? _lockoutTimer;
+  Timer? _autoPromptTimer;
+  AppLifecycleListener? _resumeListener;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final lockout = await WalletSessionStore.instance.pinLockoutRemaining();
-      if (lockout != null && mounted) {
+      if (!mounted) return;
+      if (lockout != null) {
         _enterLockout(lockout);
       } else {
-        _offerBiometrics();
+        _scheduleAutoPrompt();
       }
     });
   }
@@ -47,7 +60,32 @@ class _UnlockScreenState extends State<UnlockScreen> {
   void dispose() {
     _pin.dispose();
     _lockoutTimer?.cancel();
+    _autoPromptTimer?.cancel();
+    _resumeListener?.dispose();
     super.dispose();
+  }
+
+  /// The platform only presents a biometric prompt for an app in the
+  /// foreground. At a cold start this screen can be built while the app is
+  /// still becoming active, so the prompt waits for resume and then for the
+  /// transition to settle.
+  void _scheduleAutoPrompt() {
+    final state = WidgetsBinding.instance.lifecycleState;
+    if (state == null || state == AppLifecycleState.resumed) {
+      _autoPromptTimer?.cancel();
+      _autoPromptTimer = Timer(_autoPromptDelay, () {
+        if (mounted) _offerBiometrics();
+      });
+      return;
+    }
+    _resumeListener?.dispose();
+    _resumeListener = AppLifecycleListener(
+      onResume: () {
+        _resumeListener?.dispose();
+        _resumeListener = null;
+        if (mounted) _scheduleAutoPrompt();
+      },
+    );
   }
 
   void _enterLockout(Duration remaining) {
@@ -71,19 +109,33 @@ class _UnlockScreenState extends State<UnlockScreen> {
   }
 
   Future<void> _offerBiometrics({bool userInitiated = false}) async {
-    if (_promptShowing) return;
-    final unavailableReason = await _biometricsUnavailableReason();
-    if (!mounted) return;
-    if (unavailableReason != null) {
-      if (userInitiated) _notice(unavailableReason);
+    if (_promptShowing) {
+      if (!userInitiated) return;
+      // A prompt the system cancelled stays pending on the platform side
+      // until the app resumes. The user asking again must win over it.
+      await _biometrics.cancel();
+      if (!mounted) return;
+    }
+    if (!await WalletSessionStore.instance.biometricsEnabled()) {
+      if (mounted && userInitiated) _notice(context.tr('unlock.bio.notSetUp'));
       return;
     }
+    final availability = await _biometrics.availability();
+    if (!mounted) return;
+    if (availability == BiometricAvailability.unsupported) {
+      if (userInitiated) _notice(context.tr('settings.bio.unsupported'));
+      return;
+    }
+    // notEnrolled is attempted anyway: on iOS it also covers access having
+    // been refused, and only the prompt's own error says which one it is.
+
+    final sequence = ++_promptSequence;
     _promptShowing = true;
     final result = await WalletLockController.instance.runSystemPrompt(
-      () => _biometrics.authenticate(reason: 'Unlock your MPC wallet'),
+      () => _biometrics.authenticate(reason: context.tr('unlock.bio.reason')),
     );
+    if (!mounted || sequence != _promptSequence) return;
     _promptShowing = false;
-    if (!mounted) return;
     switch (result) {
       case BiometricResult.success:
         await WalletSessionStore.instance.clearPinFailures();
@@ -92,26 +144,14 @@ class _UnlockScreenState extends State<UnlockScreen> {
         context.go('/');
       case BiometricResult.cancelled:
         break;
-      case BiometricResult.lockedOut:
-        _notice(
-          'Biometrics are temporarily locked by the device. Use your PIN.',
-        );
-      case BiometricResult.notEnrolled:
-        _notice(_availabilityMessage(BiometricAvailability.notEnrolled));
       case BiometricResult.unavailable:
-        if (userInitiated) {
-          _notice('Biometric unlock is not available right now. Use your PIN.');
-        }
+        if (userInitiated) _notice(context.tr(biometricMessageKey(result)!));
+      case BiometricResult.lockedOut:
+      case BiometricResult.notEnrolled:
+      case BiometricResult.disabledForApp:
+        _notice(context.tr(biometricMessageKey(result)!));
     }
   }
-
-  static String _availabilityMessage(BiometricAvailability availability) =>
-      switch (availability) {
-        BiometricAvailability.notEnrolled =>
-          'No fingerprint or face is enrolled on this device yet. Add one in '
-              'your device settings, then try again.',
-        _ => 'Biometric unlock is not available on this device.',
-      };
 
   void _notice(String message) {
     ScaffoldMessenger.of(context)
@@ -119,23 +159,13 @@ class _UnlockScreenState extends State<UnlockScreen> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<String?> _biometricsUnavailableReason() async {
-    if (!await WalletSessionStore.instance.biometricsEnabled()) {
-      return 'Biometric unlock is not set up on this device. Use your PIN.';
-    }
-    final availability = await _biometrics.availability();
-    if (availability == BiometricAvailability.ready) return null;
-    return _availabilityMessage(availability);
-  }
-
   Future<void> _showBiometricPrompt() async {
     FocusManager.instance.primaryFocus?.unfocus();
-    final unavailableReason = await _biometricsUnavailableReason();
-    if (!mounted) return;
-    if (unavailableReason != null) {
-      _notice(unavailableReason);
+    if (!await WalletSessionStore.instance.biometricsEnabled()) {
+      if (mounted) _notice(context.tr('unlock.bio.notSetUp'));
       return;
     }
+    if (!mounted) return;
     setState(() => _biometricSheetOpen = true);
     final choice = await showBiometricChoiceDialog(context);
     if (mounted) setState(() => _biometricSheetOpen = false);
@@ -178,13 +208,13 @@ class _UnlockScreenState extends State<UnlockScreen> {
     setState(() {
       _busy = false;
       _pin.clear();
-      if (attemptsLeft > 0 && attemptsLeft <= 2) {
-        _error =
-            'Incorrect PIN. $attemptsLeft attempt'
-            '${attemptsLeft == 1 ? '' : 's'} remaining.';
-      } else {
-        _error = 'Incorrect PIN. Try again.';
-      }
+      _error = switch (attemptsLeft) {
+        1 => context.tr('unlock.pin.oneAttemptLeft'),
+        2 => context
+            .tr('unlock.pin.attemptsLeft')
+            .replaceFirst('{count}', '$attemptsLeft'),
+        _ => context.tr('common.pin.incorrect'),
+      };
     });
   }
 

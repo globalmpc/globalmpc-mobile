@@ -26,12 +26,12 @@ class BiometricChoice extends StatelessWidget {
     final note = switch (availability) {
       null => null,
       BiometricAvailability.ready => null,
-      BiometricAvailability.notEnrolled =>
-        'No fingerprint or face is enrolled on this device. You can turn '
-            'this on later in Settings › Security.',
-      BiometricAvailability.unsupported =>
-        'This device does not support biometric unlock. Your PIN protects '
-            'the wallet.',
+      BiometricAvailability.notEnrolled => context.tr(
+        'wallet.create.biometric.noteNotEnrolled',
+      ),
+      BiometricAvailability.unsupported => context.tr(
+        'wallet.create.biometric.noteUnsupported',
+      ),
     };
     return ListView(
       children: [

@@ -111,7 +111,6 @@ final Map<String, String> enStrings = {
   'dash.network': 'Network',
   'dash.listing': 'Listing',
   'dash.issuer': 'Issuer',
-  'dash.contract': 'Contract',
   'onboard.badge': 'NON-CUSTODIAL WALLET',
   'onboard.headline': 'Own your wallet.\nVerify the proof.',
   'onboard.subhead':
@@ -120,14 +119,12 @@ final Map<String, String> enStrings = {
   'onboard.import': 'Import wallet',
   'dash.addressLoading': 'Loading wallet…',
   'dash.addressUnavailable': 'Wallet unavailable',
-  'dash.explorer': 'Explorer',
   'tour.balance.title': 'Your balance',
   'tour.balance.body': 'Track your MPC here. Tap the eye to hide the amount.',
   'tour.actions.title': 'Quick actions',
   'tour.actions.body': 'Jump to projects, earn, wallet, or the block explorer.',
   'tour.projects.title': 'Mining projects',
-  'tour.projects.body':
-      'Browse tokenized mining assets and their status.',
+  'tour.projects.body': 'Browse tokenized mining assets and their status.',
   'tour.settings.title': 'Language & settings',
   'tour.settings.body':
       'Tap the gear to open Settings, where you can change the app language, theme, and your profile.',
@@ -156,13 +153,11 @@ final Map<String, String> enStrings = {
   'proj.partners': 'Verification network',
   'proj.orchestrationNote':
       'MPC commissions these firms per deal rather than employing them. Status reflects where each stands today.',
-  'proj.contract': 'Contract',
   'proj.tokenStandard': 'Planned issuance standard',
   'proj.overall': 'Overall',
   'proj.allocatedSupply': 'Allocated supply',
   'proj.hold': 'Hold this asset',
   'proj.notOpen': 'Not yet open',
-  'proj.viewExplorer': 'View on block explorer',
   'proj.notFound': 'Project not found',
   'proj.betaHold': 'Holding flow is not part of this beta yet.',
 

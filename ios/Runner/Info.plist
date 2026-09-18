@@ -66,17 +66,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.784029347956-s20bp47e7bm6tcqkpo4p221rtopvimv2</string>
-			</array>
-		</dict>
-	</array>
 	<key>NSFaceIDUsageDescription</key>
 	<string>MPC uses Face ID to unlock your wallet session on this device.</string>
 </dict>

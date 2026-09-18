@@ -94,72 +94,11 @@ class _GatedBanner extends StatelessWidget {
   }
 }
 
-class _ProgramCard extends StatefulWidget {
+class _ProgramCard extends StatelessWidget {
   const _ProgramCard({required this.program});
   final EarnProgramFact program;
 
-  @override
-  State<_ProgramCard> createState() => _ProgramCardState();
-}
-
-class _ProgramCardState extends State<_ProgramCard> {
-  void _notify() {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: const Color(0xFF50986B),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          content: Row(
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: Center(
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: const Color(0xFFF1EBE5),
-                        width: 1.5,
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.check_rounded,
-                        size: 12,
-                        color: Color(0xFFF1EBE5),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  context.tr('earn.notifyToast'),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    height: 16 / 13,
-                    color: Color(0xFFF7F3EE),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-  }
-
-  String get _iconAsset => switch (widget.program.id) {
+  String get _iconAsset => switch (program.id) {
     'staking' => 'assets/icons/earn/staking.svg',
     'farming' => 'assets/icons/earn/farming.svg',
     _ => 'assets/icons/bottom-nav/trend-up.svg',
@@ -183,7 +122,7 @@ class _ProgramCardState extends State<_ProgramCard> {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  context.tr('earn.${widget.program.id}.title'),
+                  context.tr('earn.${program.id}.title'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -212,7 +151,7 @@ class _ProgramCardState extends State<_ProgramCard> {
           ),
           const SizedBox(height: 14),
           Text(
-            context.tr('earn.${widget.program.id}.body'),
+            context.tr('earn.${program.id}.body'),
             style: TextStyle(
               fontSize: 12,
               height: 15 / 12,
@@ -227,33 +166,6 @@ class _ProgramCardState extends State<_ProgramCard> {
               fontWeight: FontWeight.w600,
               height: 15 / 12,
               color: context.palette.textHi,
-            ),
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: _notify,
-              icon: SvgPicture.asset(
-                'assets/icons/earn/notification.svg',
-                width: 16,
-                height: 16,
-              ),
-              label: Text(context.tr('earn.notify')),
-              style: OutlinedButton.styleFrom(
-                backgroundColor: context.palette.bg,
-                foregroundColor: context.palette.textHi,
-                side: const BorderSide(color: AppColors.gold),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                textStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  height: 17 / 14,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
             ),
           ),
         ],

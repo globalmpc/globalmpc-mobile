@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/config/app_environment.dart';
 import '../../core/constants/app_info.dart';
 import '../../core/localization/locale_controller.dart';
 import '../../core/theme/app_colors.dart';
@@ -85,7 +86,7 @@ class AboutSettingsScreen extends StatelessWidget {
             onTap: () => context.push(
               '/webview',
               extra: WebViewArgs(
-                url: 'https://www.globalmpc.tech/',
+                url: AppEnvironment.current.termsUrl,
                 title: context.tr('settings.about.terms'),
               ),
             ),
@@ -96,7 +97,7 @@ class AboutSettingsScreen extends StatelessWidget {
             onTap: () => context.push(
               '/webview',
               extra: WebViewArgs(
-                url: 'https://www.globalmpc.tech/',
+                url: AppEnvironment.current.privacyUrl,
                 title: context.tr('settings.about.privacy'),
               ),
             ),
@@ -202,7 +203,7 @@ class LegalSettingsScreen extends StatelessWidget {
                 onTap: () => context.push(
                   '/webview',
                   extra: WebViewArgs(
-                    url: 'https://www.globalmpc.tech/',
+                    url: AppEnvironment.current.privacyUrl,
                     title: context.tr('settings.about.privacy'),
                   ),
                 ),
@@ -210,7 +211,7 @@ class LegalSettingsScreen extends StatelessWidget {
               SettingRow(
                 label: context.tr('settings.legal.identity'),
                 value: context.tr('settings.legal.identityValue'),
-                onTap: () {},
+                trailing: const SizedBox.shrink(),
               ),
             ],
           ),
@@ -224,7 +225,6 @@ class LegalSettingsScreen extends StatelessWidget {
                 value: context.tr('settings.legal.review'),
                 onTap: () => showLicensePage(context: context),
               ),
-              SettingRow(label: context.tr('settings.legal.ack'), onTap: () {}),
             ],
           ),
         ],

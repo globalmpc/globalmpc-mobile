@@ -54,3 +54,8 @@ lib/firebase_options.dart
 # Internal working docs — never commit (see /must/mpc/mining-app-docs/)
 design-qa.md
 docs/
+
+# Build-time configuration. Only the documented template is tracked; the
+# per-environment files carry deployment values and stay local or in CI.
+env/*.env
+!env/example.env

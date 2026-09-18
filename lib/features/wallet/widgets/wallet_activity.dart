@@ -85,9 +85,15 @@ class WalletAllocationCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Text(
-                  '${Fmt.token(entry.value)} MPC',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '${Fmt.token(entry.value)} MPC',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -107,9 +113,18 @@ class WalletAllocationCard extends StatelessWidget {
                   style: TextStyle(color: p.textLo),
                 ),
               ),
-              Text(
-                '${Fmt.token(free)} MPC',
-                style: TextStyle(color: p.textLo, fontWeight: FontWeight.w600),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${Fmt.token(free)} MPC',
+                    style: TextStyle(
+                      color: p.textLo,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

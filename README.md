@@ -32,13 +32,15 @@ rows into one.
 | --- | --- | --- |
 | **MPC Wallet** | This app. Non-custodial: on-device keys, local signing. | all of `lib/` |
 | **MPC** (the platform) | The mining RWA infrastructure — verification, structuring, tokenization, lifecycle management — described in the whitepaper. | rendered read-only from [`lib/core/constants/mpc_facts.dart`](lib/core/constants/mpc_facts.dart) and the projects feature |
-| **$MPC** | The ecosystem utility token. Confers no ownership of any mine. | `MpcFacts` (symbol, planned supply, chain of record, contract) |
+| **$MPC** | The ecosystem utility token. Confers no ownership of any mine. | `MpcFacts` (symbol, planned supply, chain of record); the contract address is build configuration, see Configuration |
 | **Asset tokens** | Per-project mining/RWA tokens issued against a verified project. **None exists.** | not implemented; the issuance standard renders as "ERC-3643 · planned" only |
 
 ## Wallet
 
-Non-custodial wallet, **testnet-only by construction** (`ChainConfig` has no
-mainnet entry; nothing here can sign against chain ID 56):
+Non-custodial wallet. The network it reads from and signs against is fixed at
+build time by the environment file (see Configuration); a `dev` build targets
+BSC Testnet and a `prod` build targets BNB Smart Chain mainnet, and neither
+can be switched at runtime.
 
 - **Keys:** `WalletKeyService` — BIP-39 12-word create/import, BIP-44
   derivation at MetaMask's path. Interoperability is proven by unit tests
@@ -49,10 +51,18 @@ mainnet entry; nothing here can sign against chain ID 56):
   (`allowBackup=false`). There is no plaintext fallback tier.
 - **Screens:** FLAG_SECURE blocks screenshots/recording on the create/import
   flows (Android). The iOS equivalent is still open; see Known gaps.
-- **Chain:** `BscChainService` (BSC Testnet / Chapel) — balances, transfer
-  history, and locally-signed ERC-20 sends with a pre-sign gas check.
-  The test-MPC token address in `ChainConfig` is null until the Chapel deploy
-  exists; balances read 0 and sends stay blocked until then.
+- **Chain:** `BscChainService` — balances, transfer history, node-priced fee
+  estimates, locally-signed ERC-20 sends with a pre-sign gas check, and
+  receipt polling so a sent transfer shows its hash and its confirmed or
+  failed status. A build without a token address shows no token balance and
+  keeps sending disabled, and says so on screen.
+- **Registry:** `RegistryAnchorService` reads the registry anchor contract
+  (batch count, roots, manifest hashes, revocations) with plain `eth_call`s,
+  so it works on public RPC endpoints. A build without an anchor address
+  shows the feed as not connected.
+- **Presale:** an entry card that opens the presale website in the system
+  browser. The app shows no sale terms; the website decides what a visitor
+  may see. Hidden when no presale URL is configured.
 - **Custody boundary:** the mnemonic never enters a network payload;
   only signed transactions reach the RPC.
 
@@ -73,7 +83,7 @@ supply-chain review). No third-party wallet source was read or adapted.
 - **Not a source of investment claims.** The app publishes no price, no APY, no
   resource quantity, no grade, and no production figures.
 
-## Current status (2026-09-16)
+## Current status (2026-09-17)
 
 | Area | State |
 | --- | --- |
@@ -83,9 +93,11 @@ supply-chain review). No third-party wallet source was read or adapted.
 | Theming, routing, auth shell, onboarding | Built |
 | Splash / unlock shell, biometric unlock, recovery-phrase screens | Built |
 | Local notification centre | Built |
-| Wallet | **Real on-device keys, BSC Testnet only**, on `main`: BIP-39 create/import + BIP-44 derivation (`m/44'/60'/0'/0/0`, MetaMask-interoperable, vector-tested), seed in hardened secure storage, transfers signed locally. Mainnet deliberately unreachable until the security review and independent audit are complete |
+| Wallet | **Real on-device keys**, on `main`: BIP-39 create/import + BIP-44 derivation (`m/44'/60'/0'/0/0`, MetaMask-interoperable, vector-tested), seed in hardened secure storage, transfers signed locally with a node-priced fee, hash and receipt status. Network and token come from the build environment |
 | Earn (staking / farming) | **Gated placeholder**, no rate shown, no whitepaper basis |
-| Live chain data | **Wallet tab live on BSC Testnet** (BNB + test-MPC balance, transfer history, send) once a wallet exists; falls back to `MockMpcRepository` otherwise. Projects/content still mock pending the content service |
+| Live chain data | **Wallet tab live on the configured network** (BNB + MPC balance, transfer history, send) once a wallet exists; falls back to `MockMpcRepository` otherwise. Projects/content still mock pending the content service |
+| Public registry | **Read-only feed of anchored batches** from the registry anchor contract, on the dashboard and at `/registry`; "not connected" when the build has no anchor address |
+| Presale | **Link-out card** to the presale website, shown only when configured |
 | Asset tokens, issuance, holding flow | **Not built.** Planned, and gated on the legal structure |
 
 Nothing in the app is presented as verified. Per the whitepaper's disclosure
@@ -104,9 +116,11 @@ signed artifact exists, so every status reads *in discussion*, *design stage*,
 
 ## Which MPC token does this app describe?
 
-$MPC on BNB Smart Chain. Chain facts live only in
+$MPC on BNB Smart Chain. Published token facts live only in
 [`lib/core/constants/mpc_facts.dart`](lib/core/constants/mpc_facts.dart),
-guarded by a test tripwire so they cannot change by a drive-by edit.
+guarded by a test tripwire so they cannot change by a drive-by edit. The
+token contract address is not a fact in source: each build receives it from
+its environment file (see Configuration), and the app never displays it.
 
 | Item | Value |
 | --- | --- |
@@ -114,7 +128,6 @@ guarded by a test tripwire so they cannot change by a drive-by edit.
 | Token type | Utility |
 | Chain of record | BNB Smart Chain |
 | Planned total supply | 10,000,000,000 |
-| Contract | `0x9135709be5eB0f7d6B777b8d53a27B07e7d6107F` |
 
 The published whitepaper (v1.7.0) states supply as **planned**, so the app
 labels it "planned total supply" rather than presenting it as circulating.
@@ -167,6 +180,7 @@ lib/
   main.dart                 app entry
   app.dart                  providers + MaterialApp.router (repo injected here)
   core/
+    config/app_environment.dart  build-time configuration (network, token, links)
     constants/mpc_facts.dart   single source of truth for MPC facts + statuses
     constants/earn_facts.dart  gated earn capabilities (no rates by construction)
     localization/strings/      en · ko · mn · zh, en is the source of truth
@@ -178,6 +192,8 @@ lib/
     onboarding/   splash, unlock, onboarding
     dashboard/ projects/ earn/
     wallet/       entry flow, transfer screens, on-device wallet
+    registry/     public registry feed (dashboard card + screen)
+    presale/      presale entry card
     notifications/ settings/ shell/ web/
 ```
 
@@ -203,14 +219,47 @@ The whitepaper's disclosure rules are structural, so they cannot be edited away:
 - Tests assert the rules: no earn rate may contain a digit in any locale, no
   asset layer may read *secured* before a Competent Person report exists, and
   no product string may name a country.
+- A send is only ever shown as submitted with the hash the node returned. A
+  device with a PIN but no stored key gets an explanation, not a success
+  screen (`test/wallet_transfer_flow_test.dart`).
+- The screens touched by network and registry state are rendered in every
+  language, both themes, at 320 px with enlarged text; an overflow fails the
+  suite (`test/overflow_sweep_test.dart`).
+
+## Configuration
+
+Every deployment-specific value is a `--dart-define`, supplied as a group from
+an environment file. [`env/example.env`](env/example.env) documents each key;
+copy it to `env/dev.env` or `env/prod.env` and fill it in. The copies are
+gitignored, so the repository carries no contract address and no
+deployment link.
+
+| Key | Purpose |
+| --- | --- |
+| `MPC_ENV` | `dev` or `prod`. Selects the default network parameters and the validation rules |
+| `MPC_CHAIN_ID`, `MPC_RPC_URL`, `MPC_EXPLORER_URL`, `MPC_NETWORK_LABEL` | The chain the wallet reads from and signs against |
+| `MPC_TOKEN_ADDRESS` | ERC-20 token contract on that chain. Required for `prod` |
+| `MPC_REGISTRY_ANCHOR_ADDRESS` | Registry anchor contract. Optional; empty disables the feed |
+| `MPC_HISTORY_BLOCK_WINDOW` | Blocks scanned for transfer history |
+| `MPC_PRESALE_URL` | Presale website. Optional; empty hides the entry |
+| `MPC_TERMS_URL`, `MPC_PRIVACY_URL`, `MPC_HELP_URL` | Legal and help pages opened from Settings |
+| `MPC_STORE_URL` | Store listing for "Rate us". Optional; empty hides the row |
+
+The rules are enforced in
+[`lib/core/config/app_environment.dart`](lib/core/config/app_environment.dart)
+and pinned by `test/app_environment_test.dart`: a `prod` build must target
+chain 56 and must carry a token address, a `dev` build must not target
+mainnet, and a malformed value fails the build instead of being ignored. With
+no environment file at all the app runs as a `dev` build on BSC Testnet with
+no token, which is what the test suite uses.
 
 ## Run
 
 ```bash
 flutter pub get
-flutter run
+flutter run --dart-define-from-file=env/dev.env
 flutter analyze     # 0 issues
-flutter test        # formatters, facts, repository, honesty rules, localization
+flutter test        # formatters, facts, environment rules, honesty rules, localization, layout sweep
 ```
 
 ## Build and release
@@ -228,6 +277,11 @@ Both deploy workflows take Android and iOS toggles and a version string.
 Release builds only: this app has no over-the-air patch channel. Signing
 keys and store credentials are not in this repository.
 
+The pipeline must pass the environment file for the stage it builds
+(`--dart-define-from-file=env/dev.env` or `env/prod.env`), with the file
+supplied from its own secrets. A build that receives no file is a `dev`
+build on BSC Testnet with no token, never a production wallet.
+
 ### Bump the build number first
 
 Distribution rejects a re-upload of an existing build number, so increment the
@@ -243,11 +297,11 @@ version: 0.1.0+4   # 0.1.0 = version name, 4 = build number
 flutter clean            # only needed after dependency or config changes
 flutter pub get
 
-flutter build apk --release
+flutter build apk --release --dart-define-from-file=env/prod.env
 # output: build/app/outputs/flutter-apk/app-release.apk
 
 cd ios && pod install && cd ..
-flutter build ipa --release --export-method ad-hoc
+flutter build ipa --release --export-method ad-hoc --dart-define-from-file=env/prod.env
 # output: build/ios/ipa/*.ipa
 ```
 
@@ -262,15 +316,6 @@ holds its passwords; both stay out of the repository. See
 expected keys. When the file is absent, a release build falls back to the debug
 key and prints a warning; such an artifact is fine for local testing but must
 not be distributed.
-
-Google Sign-In is bound to the SHA-1 of the signing key registered for
-**globalmpc**. A build signed with an unregistered keystore fails sign-in with
-`ApiException: 10` while guest mode keeps working. Print a keystore's SHA-1
-with:
-
-```bash
-keytool -list -v -keystore <path-to-keystore> -alias <alias>
-```
 
 Platform client config is not committed. Use the **globalmpc** project
 credentials already on your machine, or take them from the workflows secrets.

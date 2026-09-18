@@ -3,8 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/config/app_environment.dart';
 import '../../core/constants/app_info.dart';
-import '../../core/constants/mpc_facts.dart';
+import '../../core/platform/external_link.dart';
 import '../../core/localization/locale_controller.dart';
 import '../../core/security/wallet_lock_controller.dart';
 import '../../core/security/wallet_session_store.dart';
@@ -12,6 +13,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/theme_controller.dart';
 import '../../core/utils/formatters.dart';
 import '../wallet/wallet_provider.dart';
+import '../web/web_view_screen.dart';
 import 'language_sheet.dart';
 import 'theme_sheet.dart';
 import 'settings_widgets.dart';
@@ -39,7 +41,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final walletState = context.watch<WalletProvider>().state;
     final wallet = walletState.data;
     final displayAddress = wallet?.address ?? _storedAddress;
-    final displayNetwork = wallet?.network ?? MpcFacts.network;
+    final environment = AppEnvironment.current;
+    final displayNetwork = wallet?.network ?? environment.chain.networkLabel;
     final p = context.palette;
     final isLight = Theme.of(context).brightness == Brightness.light;
     final pageBg = isLight ? const Color(0xFFF8F5F1) : p.bg;
@@ -149,7 +152,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '$displayNetwork · This device',
+                              '$displayNetwork · ${context.tr('common.thisDevice')}',
                               style: TextStyle(color: p.textLo, fontSize: 11),
                             ),
                           ],
@@ -197,7 +200,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 SettingRow(
                   label: context.tr('dash.network'),
-                  value: MpcFacts.network,
+                  value: environment.chain.networkLabel,
                   onTap: () => context.push('/settings/network'),
                 ),
                 SettingRow(
@@ -220,11 +223,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   value: 'v$appVersion',
                   onTap: () => context.push('/settings/about'),
                 ),
-                SettingRow(
-                  label: context.tr('settings.rateUs'),
-                  value: context.tr('settings.review'),
-                  onTap: () {},
-                ),
+                if (environment.hasStoreListing)
+                  SettingRow(
+                    label: context.tr('settings.rateUs'),
+                    value: context.tr('settings.review'),
+                    onTap: () => _openStore(context, environment.storeUrl!),
+                  ),
               ],
             ),
             const SizedBox(height: 27),
@@ -258,6 +262,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _openStore(BuildContext context, String url) async {
+    if (await ExternalLink.open(url)) return;
+    if (!context.mounted) return;
+    context.push(
+      '/webview',
+      extra: WebViewArgs(url: url, title: context.tr('settings.rateUs')),
     );
   }
 
