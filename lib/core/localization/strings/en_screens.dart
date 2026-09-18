@@ -27,8 +27,6 @@ const Map<String, String> enScreensStrings = {
   'earn.status.planned': 'Planned',
   'earn.rateLabel': 'Reward rate',
   'earn.ratePending': 'Announced at listing',
-  'earn.notify': 'Notify me',
-  'earn.notifyToast': 'We’ll notify you when this opens.',
   'earn.staking.title': 'Staking',
   'earn.staking.body':
       'Lock MPC to back mining-asset issuance. Reward terms are published when the program opens at listing.',
@@ -237,11 +235,10 @@ const Map<String, String> enScreensStrings = {
   'receive.title': 'Receive {asset}',
   'receive.unavailable': 'Wallet address unavailable',
   'receive.warning':
-      'Only send {asset} and supported BNB Smart Chain assets to this address.',
+      'Only send {asset} and supported {network} assets to this address.',
   'receive.copy': 'Copy address',
   'receive.share': 'Share address',
-  'receive.shareTemplate':
-      'My {asset} wallet address on BNB Smart Chain:\n{address}',
+  'receive.shareTemplate': 'My {asset} wallet address on {network}:\n{address}',
   'receive.wrongNetwork':
       'Assets sent on another network may be permanently lost.',
   'send.title': 'Send MPC',
@@ -286,7 +283,6 @@ const Map<String, String> enScreensStrings = {
   'send.success.body': '{amount} MPC was submitted to {address}.',
   'send.success.status': 'Status',
   'send.success.pending': 'Pending confirmation',
-  'send.success.view': 'View transaction',
   'send.success.back': 'Back to wallet',
   'send.failure.title': 'Transaction not sent',
   'send.failure.body':
@@ -319,12 +315,9 @@ const Map<String, String> enScreensStrings = {
   'settings.security.changePin': 'Change app PIN',
   'settings.security.pinDigits': '6 digits',
   'settings.security.biometrics': 'Biometric unlock',
-  'settings.security.devices': 'Devices',
-  'settings.security.connectedDevices': 'Connected devices',
   'settings.security.activeNetwork': 'Active network',
   'settings.security.chainNote':
       'Chain ID {chainId} · MPC transfers use BNB for network fees.',
-  'settings.security.contract': 'MPC contract',
   'settings.bio.enrol':
       'Enrol a fingerprint or face in your device settings first.',
   'settings.bio.unsupported': 'This device does not support biometric unlock.',
@@ -410,7 +403,6 @@ const Map<String, String> enScreensStrings = {
   'settings.legal.identityValue': 'Public address only',
   'settings.legal.openSource': 'Open source',
   'settings.legal.review': 'Review',
-  'settings.legal.ack': 'Third-party acknowledgements',
   'settings.pin.current': 'Current PIN',
   'settings.pin.new': 'New PIN',
   'settings.pin.confirmLabel': 'Confirm new PIN',
@@ -452,4 +444,72 @@ const Map<String, String> enScreensStrings = {
   'notif.sec.biometricsOff.title': 'Biometric unlock off',
   'notif.sec.biometricsOff.body':
       'Biometric unlock was turned off for this wallet.',
+
+  'send.tokenNotConfigured.title': 'Sending is not available',
+  'send.tokenNotConfigured.body':
+      'This build has no MPC token configured on {network}.',
+  'send.review.estimating': 'Estimating fee…',
+  'send.review.feeUnavailable': 'Fee unavailable',
+  'send.review.feeRetry': 'Retry estimate',
+  'send.success.hash': 'Transaction hash',
+  'send.success.explorer': 'View on block explorer',
+  'send.success.confirmed': 'Confirmed on chain',
+  'send.success.failedOnChain': 'Failed on chain',
+  'send.success.stillPending': 'Still pending. Check the block explorer later.',
+  'send.failure.keyUnavailable':
+      'No wallet key is stored on this device. Restore the wallet from your recovery phrase before sending.',
+  'send.failure.gas':
+      'Not enough BNB to pay the network fee. Nothing was sent.',
+  'send.error.checksum':
+      'This address failed its checksum. Check every character.',
+  'wallet.historyUnavailable': 'Recent activity unavailable',
+  'wallet.historyUnavailableBody':
+      'The network did not return transfer history. Balances are current.',
+  'registry.title': 'Public registry',
+  'registry.subtitle':
+      'Integrity anchors of the MPC registry, recorded on chain.',
+  'registry.card.title': 'Public registry anchors',
+  'registry.card.body':
+      'Each anchor fixes a batch of registry records on chain so they cannot be changed later.',
+  'registry.count': '{count} anchored batches',
+  'registry.latest': 'Latest anchor {date}',
+  'registry.notConnected.title': 'Registry anchor not connected',
+  'registry.notConnected.body':
+      'This build has no registry anchor address configured.',
+  'registry.empty.title': 'No anchored batches yet',
+  'registry.empty.body':
+      'Batches will appear here once the registry anchors them.',
+  'registry.unavailable.title': 'Registry unavailable',
+  'registry.unavailable.body':
+      'The anchor contract could not be read. Your wallet is not affected.',
+  'registry.batch': 'Batch',
+  'registry.records': 'Records',
+  'registry.root': 'Merkle root',
+  'registry.manifest': 'Manifest hash',
+  'registry.anchoredAt': 'Anchored',
+  'registry.status.active': 'Active',
+  'registry.status.revoked': 'Revoked',
+  'registry.status.superseded': 'Superseded',
+  'registry.viewContract': 'View anchor contract',
+  'registry.open': 'View public registry',
+  'registry.copied': 'Copied',
+  'presale.title': 'MPC presale',
+  'presale.body':
+      'Participation runs on the presale website. Eligibility is checked there before any terms are shown.',
+  'presale.open': 'Open presale website',
+  'presale.external': 'Opens in your browser.',
+
+  'unlock.bio.reason': 'Unlock your MPC wallet',
+  'unlock.bio.notSetUp':
+      'Biometric unlock is not turned on for this wallet. Use your PIN, or turn it on in Settings › Security.',
+  'unlock.pin.oneAttemptLeft': 'Incorrect PIN. 1 attempt remaining.',
+  'unlock.pin.attemptsLeft': 'Incorrect PIN. {count} attempts remaining.',
+  'bio.disabledForApp':
+      'Biometric access for MPC is turned off. Allow it in your device settings for MPC, then try again.',
+  'wallet.create.biometric.noteNotEnrolled':
+      'No fingerprint or face is available to MPC on this device. Enrol one, or allow MPC to use it, in your device settings. You can turn this on later in Settings › Security.',
+  'wallet.create.biometric.noteUnsupported':
+      'This device does not support biometric unlock. Your PIN protects the wallet.',
+  'wallet.create.biometric.skipped':
+      'Biometric unlock was not turned on. You can enable it later in Settings › Security.',
 };

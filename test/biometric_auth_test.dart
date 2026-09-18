@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:mpc_mining_app/core/security/biometric_auth.dart';
@@ -7,12 +9,18 @@ class _FakeLocalAuth extends LocalAuthentication {
     this.supported = true,
     this.enrolled = const [BiometricType.strong],
     this.outcome,
+    this.hang = false,
   });
 
   final bool supported;
   final List<BiometricType> enrolled;
 
   final Object? outcome;
+
+  /// Never completes the prompt, like a system-cancelled prompt the
+  /// platform is holding until the app resumes.
+  final bool hang;
+  int stopCalls = 0;
 
   @override
   Future<bool> get canCheckBiometrics async => supported;
@@ -28,9 +36,16 @@ class _FakeLocalAuth extends LocalAuthentication {
     bool sensitiveTransaction = true,
     bool persistAcrossBackgrounding = false,
   }) async {
+    if (hang) return Completer<bool>().future;
     final o = outcome;
     if (o is LocalAuthExceptionCode) throw LocalAuthException(code: o);
     return o as bool;
+  }
+
+  @override
+  Future<bool> stopAuthentication() async {
+    stopCalls++;
+    return true;
   }
 }
 
@@ -88,19 +103,44 @@ void main() {
       );
     });
 
-    test('missing enrolment and host errors are distinguishable', () async {
+    test('missing enrolment, refused access and host errors differ', () async {
       expect(
         await run(LocalAuthExceptionCode.noBiometricsEnrolled),
         BiometricResult.notEnrolled,
+      );
+      // What iOS reports when the user refused this app access to Face ID.
+      expect(
+        await run(LocalAuthExceptionCode.noBiometricHardware),
+        BiometricResult.disabledForApp,
       );
       expect(
         await run(LocalAuthExceptionCode.uiUnavailable),
         BiometricResult.unavailable,
       );
       expect(
-        await run(LocalAuthExceptionCode.noBiometricHardware),
+        await run(LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable),
         BiometricResult.unavailable,
       );
     });
+
+    test('a prompt that never completes is cancelled after the timeout', () async {
+      final fake = _FakeLocalAuth(hang: true);
+      final auth = BiometricAuth(fake, const Duration(milliseconds: 50));
+
+      final result = await auth.authenticate(reason: 'test');
+
+      expect(result, BiometricResult.cancelled);
+      expect(fake.stopCalls, 1);
+    });
+  });
+
+  test('every non-trivial result has a message key', () {
+    for (final result in BiometricResult.values) {
+      final key = biometricMessageKey(result);
+      final silent =
+          result == BiometricResult.success ||
+          result == BiometricResult.cancelled;
+      expect(key == null, silent, reason: '$result');
+    }
   });
 }

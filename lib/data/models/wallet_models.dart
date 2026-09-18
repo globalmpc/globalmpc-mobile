@@ -53,6 +53,24 @@ class WalletTransaction {
   bool get isIncoming => direction == TxDirection.incoming;
 }
 
+/// Result of a transfer-history query. An empty list and an unavailable
+/// history are different facts and the wallet shows them differently.
+@immutable
+class TransferHistory {
+  const TransferHistory(this.transactions, {this.unavailable = false});
+
+  static const TransferHistory empty = TransferHistory([]);
+
+  /// The query itself failed; nothing is known about the history.
+  static const TransferHistory failed = TransferHistory([], unavailable: true);
+
+  final List<WalletTransaction> transactions;
+
+  /// True when the provider could not answer, so [transactions] says nothing
+  /// about what happened on chain.
+  final bool unavailable;
+}
+
 /// A demo, non-custodial BSC account. This is a prototype wallet: no real keys
 /// are generated or stored. Kept explicit so nothing here is mistaken for a
 /// production custody surface.
@@ -66,6 +84,7 @@ class WalletAccount {
     required this.allocations,
     this.bnbBalance = 0.0128,
     this.isDemo = false,
+    this.historyUnavailable = false,
   });
 
   final String address;
@@ -76,6 +95,10 @@ class WalletAccount {
   final double mpcBalance;
   final String network;
   final List<WalletTransaction> transactions;
+
+  /// True when the last history query failed, so an empty [transactions]
+  /// must not be read as "nothing happened".
+  final bool historyUnavailable;
 
   /// projectId -> MPC allocated to that project by this holder.
   final Map<String, double> allocations;

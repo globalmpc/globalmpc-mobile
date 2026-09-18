@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:showcaseview/showcaseview.dart';
 
-import '../../../core/constants/mpc_facts.dart';
+import '../../../core/config/app_environment.dart';
 import '../../../core/localization/locale_controller.dart';
 import '../../../core/notifications/notification_center.dart';
 import '../../../core/state/view_state.dart';
@@ -190,7 +190,7 @@ class _BalanceHeroState extends State<DashboardBalanceHero> {
                             ),
                             const Spacer(),
                             Pill(
-                              MpcFacts.networkShort,
+                              AppEnvironment.current.chain.networkShort,
                               color: const Color(0xFFC2773F),
                               backgroundColor: const Color(0xFF322F28),
                             ),

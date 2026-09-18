@@ -31,12 +31,14 @@ class ChainMpcRepository implements MpcRepository {
       _chain.mpcBalance(address),
       _chain.recentTransfers(address),
     ]);
+    final history = results[2] as TransferHistory;
 
     return WalletAccount(
       address: address,
       mpcBalance: results[1] as double,
       network: _chain.config.networkLabel,
-      transactions: (results[2] as List).cast<WalletTransaction>(),
+      transactions: history.transactions,
+      historyUnavailable: history.unavailable,
       allocations: const {},
       bnbBalance: results[0] as double,
     );

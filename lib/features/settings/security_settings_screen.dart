@@ -41,34 +41,27 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
     final auth = BiometricAuth();
     final availability = await auth.availability();
     if (!mounted) return;
-    if (availability != BiometricAvailability.ready) {
-      _notice(switch (availability) {
-        BiometricAvailability.notEnrolled => context.tr('settings.bio.enrol'),
-        _ => context.tr('settings.bio.unsupported'),
-      });
+    if (availability == BiometricAvailability.unsupported) {
+      _notice(context.tr('settings.bio.unsupported'));
       return;
     }
+    // An empty enrolled list is still worth a prompt: on iOS it also means
+    // access was refused, and only the prompt's error tells the two apart.
     final result = await WalletLockController.instance.runSystemPrompt(
       () => auth.authenticate(reason: context.tr('settings.bio.authReason')),
     );
     if (!mounted) return;
-    switch (result) {
-      case BiometricResult.success:
-        await store.setBiometricsEnabled(true);
-        await NotificationCenter.instance.notifySecurity(
-          'notif.sec.biometricsOn.title',
-          'notif.sec.biometricsOn.body',
-        );
-        if (mounted) setState(() => _biometrics = true);
-      case BiometricResult.cancelled:
-        break;
-      case BiometricResult.lockedOut:
-        _notice(context.tr('settings.bio.locked'));
-      case BiometricResult.notEnrolled:
-        _notice(context.tr('settings.bio.enrol'));
-      case BiometricResult.unavailable:
-        _notice(context.tr('settings.bio.unavailable'));
+    if (result == BiometricResult.success) {
+      await store.setBiometricsEnabled(true);
+      await NotificationCenter.instance.notifySecurity(
+        'notif.sec.biometricsOn.title',
+        'notif.sec.biometricsOn.body',
+      );
+      if (mounted) setState(() => _biometrics = true);
+      return;
     }
+    final messageKey = biometricMessageKey(result);
+    if (messageKey != null) _notice(context.tr(messageKey));
   }
 
   void _notice(String message) {
@@ -102,17 +95,6 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
                   if (_biometrics == null) return;
                   await _setBiometrics(!_biometrics!);
                 },
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          SettingsLabel(context.tr('settings.security.devices')),
-          SettingsGroup(
-            children: [
-              SettingRow(
-                label: context.tr('settings.security.connectedDevices'),
-                value: context.tr('common.thisDevice'),
-                onTap: () {},
               ),
             ],
           ),

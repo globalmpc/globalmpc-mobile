@@ -276,7 +276,7 @@ class _ProjectDetailViewState extends State<_ProjectDetailView> {
                 const SizedBox(height: 14),
                 const ProjectPartnersCard(),
                 const SizedBox(height: 20),
-                SectionHeader(context.tr('proj.contract'), fontSize: 18),
+                SectionHeader(context.tr('dash.utilityToken'), fontSize: 18),
                 const SizedBox(height: 14),
                 const ProjectContractCard(),
                 const SizedBox(height: 20),

@@ -3,18 +3,20 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'core/config/app_environment.dart';
 import 'core/localization/app_strings.dart';
 import 'core/localization/locale_controller.dart';
 import 'core/router/app_router.dart';
 import 'core/security/wallet_lock_controller.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
-import 'core/constants/chain_config.dart';
 import 'data/repositories/chain_mpc_repository.dart';
 import 'data/repositories/mock_mpc_repository.dart';
 import 'data/repositories/mpc_repository.dart';
 import 'data/services/bsc_chain_service.dart';
+import 'data/services/registry_anchor_service.dart';
 import 'features/projects/projects_provider.dart';
+import 'features/registry/registry_provider.dart';
 import 'features/wallet/wallet_provider.dart';
 
 class MpcApp extends StatefulWidget {
@@ -32,11 +34,20 @@ class MpcApp extends StatefulWidget {
 }
 
 class _MpcAppState extends State<MpcApp> {
-  // Live wallet data from BSC Testnet once an on-device wallet exists;
-  // mock everywhere else (projects/content, and wallet until create/import).
+  // The network, token and registry come from the build environment. Wallet
+  // data is live on that network once an on-device wallet exists; projects
+  // and content stay on the mock until the content service exists.
+  static final AppEnvironment _environment = AppEnvironment.current;
   static final BscChainService _chainService = BscChainService(
-    ChainConfig.bscTestnet,
+    _environment.chain,
   );
+  static final RegistryAnchorService? _registryService =
+      _environment.hasRegistry
+      ? RegistryAnchorService(
+          config: _environment.chain,
+          anchorAddress: _environment.registryAnchorAddress!,
+        )
+      : null;
   static final MpcRepository _repository = ChainMpcRepository(
     _chainService,
     const MockMpcRepository(),
@@ -68,6 +79,9 @@ class _MpcAppState extends State<MpcApp> {
         ),
         ChangeNotifierProvider(
           create: (_) => WalletProvider(_repository)..load(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => RegistryProvider(_registryService)..load(),
         ),
       ],
       child: LocaleControllerScope.provide(

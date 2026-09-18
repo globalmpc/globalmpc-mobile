@@ -27,8 +27,6 @@ const Map<String, String> mnScreensStrings = {
   'earn.status.planned': 'Төлөвлөсөн',
   'earn.rateLabel': 'Урамшууллын хувь',
   'earn.ratePending': 'Бүртгэлийн үед зарлана',
-  'earn.notify': 'Мэдэгдэл авах',
-  'earn.notifyToast': 'Энэ нээгдэхэд бид танд мэдэгдэнэ.',
   'earn.staking.title': 'Стейкинг',
   'earn.staking.body':
       'Уул уурхайн хөрөнгийн гаргалтыг дэмжихийн тулд MPC-г түгжинэ. Урамшууллын нөхцөлийг бүртгэлийн үед хөтөлбөр нээгдэхэд нийтэлнэ.',
@@ -246,11 +244,11 @@ const Map<String, String> mnScreensStrings = {
   'receive.title': '{asset} хүлээн авах',
   'receive.unavailable': 'Хэтэвчийн хаяг боломжгүй',
   'receive.warning':
-      'Энэ хаяг руу зөвхөн {asset} болон дэмжигдсэн BNB Smart Chain хөрөнгө илгээнэ үү.',
+      'Энэ хаяг руу зөвхөн {asset} болон дэмжигдсэн {network} хөрөнгө илгээнэ үү.',
   'receive.copy': 'Хаяг хуулах',
   'receive.share': 'Хаяг хуваалцах',
   'receive.shareTemplate':
-      'BNB Smart Chain дээрх миний {asset} хэтэвчийн хаяг:\n{address}',
+      '{network} дээрх миний {asset} хэтэвчийн хаяг:\n{address}',
   'receive.wrongNetwork':
       'Өөр сүлжээнээс илгээсэн хөрөнгө байнгын алдагдах магадлалтай.',
   'send.title': 'MPC илгээх',
@@ -296,7 +294,6 @@ const Map<String, String> mnScreensStrings = {
   'send.success.body': '{amount} MPC {address}-руу илгээгдлээ.',
   'send.success.status': 'Төлөв',
   'send.success.pending': 'Баталгаажуулалт хүлээж байна',
-  'send.success.view': 'Гүйлгээг харах',
   'send.success.back': 'Хэтэвч рүү буцах',
   'send.failure.title': 'Гүйлгээ илгээгдээгүй',
   'send.failure.body':
@@ -329,12 +326,9 @@ const Map<String, String> mnScreensStrings = {
   'settings.security.changePin': 'Апп PIN солих',
   'settings.security.pinDigits': '6 орон',
   'settings.security.biometrics': 'Биометр түгжээ тайлах',
-  'settings.security.devices': 'Төхөөрөмжүүд',
-  'settings.security.connectedDevices': 'Холбогдсон төхөөрөмж',
   'settings.security.activeNetwork': 'Идэвхтэй сүлжээ',
   'settings.security.chainNote':
       'Чейн ID {chainId} · MPC гүйлгээний төлбөрт BNB ашигладаг.',
-  'settings.security.contract': 'MPC гэрээ',
   'settings.bio.enrol':
       'Эхлээд төхөөрөмжийн тохиргоонд хурууны хээ эсвэл нүүрээ бүртгүүлнэ үү.',
   'settings.bio.unsupported':
@@ -423,7 +417,6 @@ const Map<String, String> mnScreensStrings = {
   'settings.legal.identityValue': 'Зөвхөн нээлттэй хаяг',
   'settings.legal.openSource': 'Нээлттэй эх',
   'settings.legal.review': 'Харах',
-  'settings.legal.ack': 'Гуравдагч талуудын мэдэгдэл',
   'settings.pin.current': 'Одоогийн PIN',
   'settings.pin.new': 'Шинэ PIN',
   'settings.pin.confirmLabel': 'Шинэ PIN баталгаажуулах',
@@ -467,4 +460,72 @@ const Map<String, String> mnScreensStrings = {
   'notif.sec.biometricsOff.title': 'Биометр түгжээ тайлалт унтраалаа',
   'notif.sec.biometricsOff.body':
       'Энэ хэтэвчийн биометр түгжээ тайлалтыг унтраалаа.',
+
+  'send.tokenNotConfigured.title': 'Илгээх боломжгүй',
+  'send.tokenNotConfigured.body':
+      'Энэ хувилбарт {network} дээрх MPC токен тохируулагдаагүй байна.',
+  'send.review.estimating': 'Шимтгэлийг тооцоолж байна…',
+  'send.review.feeUnavailable': 'Шимтгэл тодорхойгүй',
+  'send.review.feeRetry': 'Дахин тооцоолох',
+  'send.success.hash': 'Гүйлгээний хэш',
+  'send.success.explorer': 'Блок хайгуур дээр харах',
+  'send.success.confirmed': 'Чейн дээр баталгаажсан',
+  'send.success.failedOnChain': 'Чейн дээр амжилтгүй болсон',
+  'send.success.stillPending':
+      'Хүлээгдсээр байна. Дараа нь блок хайгуур дээр шалгана уу.',
+  'send.failure.keyUnavailable':
+      'Энэ төхөөрөмжид хэтэвчийн түлхүүр хадгалагдаагүй байна. Илгээхийн өмнө сэргээх үгсээр хэтэвчээ сэргээнэ үү.',
+  'send.failure.gas':
+      'Сүлжээний шимтгэл төлөх BNB хүрэлцэхгүй байна. Юу ч илгээгдээгүй.',
+  'send.error.checksum':
+      'Энэ хаяг шалгалтын нийлбэрт тэнцээгүй. Тэмдэгт бүрийг шалгана уу.',
+  'wallet.historyUnavailable': 'Сүүлийн үйл ажиллагаа боломжгүй',
+  'wallet.historyUnavailableBody':
+      'Сүлжээ гүйлгээний түүхийг буцаасангүй. Үлдэгдэл шинэчлэгдсэн байна.',
+  'registry.title': 'Нийтийн бүртгэл',
+  'registry.subtitle':
+      'Чейн дээр бүртгэгдсэн MPC бүртгэлийн бүрэн бүтэн байдлын анкерууд.',
+  'registry.card.title': 'Нийтийн бүртгэлийн анкерууд',
+  'registry.card.body':
+      'Анкер бүр бүртгэлийн бичлэгийн багцыг чейн дээр бэхлэж, дараа нь өөрчлөх боломжгүй болгодог.',
+  'registry.count': 'Бэхлэгдсэн {count} багц',
+  'registry.latest': 'Сүүлийн анкер {date}',
+  'registry.notConnected.title': 'Бүртгэлийн анкер холбогдоогүй',
+  'registry.notConnected.body':
+      'Энэ хувилбарт бүртгэлийн анкерын хаяг тохируулагдаагүй байна.',
+  'registry.empty.title': 'Бэхлэгдсэн багц одоогоор алга',
+  'registry.empty.body': 'Бүртгэл багцуудыг бэхэлсний дараа энд харагдана.',
+  'registry.unavailable.title': 'Бүртгэл боломжгүй',
+  'registry.unavailable.body':
+      'Анкерын гэрээг уншиж чадсангүй. Таны хэтэвчид нөлөөлөхгүй.',
+  'registry.batch': 'Багц',
+  'registry.records': 'Бичлэгийн тоо',
+  'registry.root': 'Меркл үндэс',
+  'registry.manifest': 'Манифестын хэш',
+  'registry.anchoredAt': 'Бэхлэгдсэн огноо',
+  'registry.status.active': 'Идэвхтэй',
+  'registry.status.revoked': 'Хүчингүй болсон',
+  'registry.status.superseded': 'Солигдсон',
+  'registry.viewContract': 'Анкерын гэрээг харах',
+  'registry.open': 'Нийтийн бүртгэлийг харах',
+  'registry.copied': 'Хуулагдлаа',
+  'presale.title': 'MPC урьдчилсан борлуулалт',
+  'presale.body':
+      'Оролцоо урьдчилсан борлуулалтын вэбсайт дээр явагдана. Нөхцөлийг харуулахаас өмнө вэбсайт дээр эрхийг шалгана.',
+  'presale.open': 'Урьдчилсан борлуулалтын вэбсайтыг нээх',
+  'presale.external': 'Таны хөтөч дээр нээгдэнэ.',
+
+  'unlock.bio.reason': 'MPC хэтэвчээ нээх',
+  'unlock.bio.notSetUp':
+      'Энэ хэтэвчид биометр түгжээ тайлалт асаагүй байна. PIN ашиглах эсвэл Тохиргоо › Аюулгүй байдал хэсгээс асаана уу.',
+  'unlock.pin.oneAttemptLeft': 'PIN буруу байна. 1 оролдлого үлдлээ.',
+  'unlock.pin.attemptsLeft': 'PIN буруу байна. {count} оролдлого үлдлээ.',
+  'bio.disabledForApp':
+      'MPC-д биометр ашиглах зөвшөөрөл хаалттай байна. Төхөөрөмжийн тохиргоонд MPC-д зөвшөөрөл өгөөд дахин оролдоно уу.',
+  'wallet.create.biometric.noteNotEnrolled':
+      'Энэ төхөөрөмж дээр MPC-д ашиглах хурууны хээ эсвэл нүүр алга. Төхөөрөмжийн тохиргоонд бүртгүүлэх эсвэл MPC-д зөвшөөрнө үү. Дараа нь Тохиргоо › Аюулгүй байдал хэсгээс асааж болно.',
+  'wallet.create.biometric.noteUnsupported':
+      'Энэ төхөөрөмж биометр түгжээ тайлалтыг дэмждэггүй. Таны PIN хэтэвчийг хамгаална.',
+  'wallet.create.biometric.skipped':
+      'Биометр түгжээ тайлалт асаагдсангүй. Дараа нь Тохиргоо › Аюулгүй байдал хэсгээс асааж болно.',
 };

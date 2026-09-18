@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/config/app_environment.dart';
 import '../../core/localization/locale_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../web/web_view_screen.dart';
@@ -27,7 +28,7 @@ class SupportSettingsScreen extends StatelessWidget {
                 trailing: const _SupportChevron(),
                 onTap: () => _open(
                   context,
-                  'https://www.globalmpc.tech/',
+                  AppEnvironment.current.helpUrl,
                   context.tr('settings.faq.recovery'),
                 ),
               ),
@@ -36,7 +37,7 @@ class SupportSettingsScreen extends StatelessWidget {
                 trailing: const _SupportChevron(),
                 onTap: () => _open(
                   context,
-                  'https://www.globalmpc.tech/',
+                  AppEnvironment.current.helpUrl,
                   context.tr('settings.faq.sendingTitle'),
                 ),
               ),
@@ -45,7 +46,7 @@ class SupportSettingsScreen extends StatelessWidget {
                 trailing: const _SupportChevron(),
                 onTap: () => _open(
                   context,
-                  'https://www.globalmpc.tech/',
+                  AppEnvironment.current.helpUrl,
                   context.tr('settings.faq.fees'),
                 ),
               ),
@@ -54,7 +55,7 @@ class SupportSettingsScreen extends StatelessWidget {
                 trailing: const _SupportChevron(),
                 onTap: () => _open(
                   context,
-                  'https://www.globalmpc.tech/',
+                  AppEnvironment.current.helpUrl,
                   context.tr('settings.faq.security'),
                 ),
               ),
@@ -70,7 +71,7 @@ class SupportSettingsScreen extends StatelessWidget {
                 trailing: const _SupportChevron(),
                 onTap: () => _open(
                   context,
-                  'https://www.globalmpc.tech/',
+                  AppEnvironment.current.helpUrl,
                   context.tr('settings.support.contactSupport'),
                 ),
               ),
@@ -79,7 +80,7 @@ class SupportSettingsScreen extends StatelessWidget {
                 trailing: const _SupportChevron(),
                 onTap: () => _open(
                   context,
-                  'https://www.globalmpc.tech/',
+                  AppEnvironment.current.helpUrl,
                   context.tr('settings.support.report'),
                 ),
               ),

@@ -4,22 +4,19 @@ class MpcFacts {
   static const String tokenName = 'MPC';
   static const String tokenSymbol = 'MPC';
   static const String issuer = 'Bolor Geo MPC Corp.';
+  /// Chain of record as the whitepaper publishes it. The network a build
+  /// actually talks to is `AppEnvironment.current.chain`, and screens that
+  /// say "Network" show that one.
   static const String network = 'BNB Smart Chain';
-  static const String networkShort = 'BSC';
   static const int totalSupply = 10000000000;
-  static const String contractAddress =
-      '0x9135709be5eB0f7d6B777b8d53a27B07e7d6107F';
 
   static const String tokenStandard = 'ERC-3643';
-  static const String explorerBase = 'https://bscscan.com';
 
   static const String taglineKey = 'facts.tagline';
 
   static const String trustLineKey = 'app.trust';
 
   static const String disclosureKey = 'facts.disclosure';
-
-  static String get explorerTokenUrl => '$explorerBase/token/$contractAddress';
 
   static const List<RiskLayerFact> riskLayers = [
     RiskLayerFact('risk.resource.title', 'risk.resource.detail'),

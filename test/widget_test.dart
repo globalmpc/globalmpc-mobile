@@ -16,22 +16,19 @@ void main() {
     expect(Fmt.compact(10000000000), '10B');
     expect(Fmt.grouped(10000000000), '10,000,000,000');
     expect(
-      Fmt.shortAddress('0x9135709be5eB0f7d6B777b8d53a27B07e7d6107F'),
-      '0x9135…107F',
+      Fmt.shortAddress('0x1234567890abcdef1234567890abcdef12345678'),
+      '0x1234…5678',
     );
     expect(Fmt.percent(0.42), '42%');
   });
 
-  test('MPC facts stay pinned to the published BSC token', () {
+  test('MPC facts stay pinned to the published token', () {
     expect(MpcFacts.totalSupply, 10000000000);
-    // Chain and contract are what the official site publishes. Changing either
-    // requires an explicit decision, not a drive-by edit; this is the tripwire.
+    // The chain of record is what the whitepaper publishes. Changing it
+    // requires an explicit decision, not a drive-by edit; this is the
+    // tripwire. The contract address is build configuration, never a fact
+    // in source.
     expect(MpcFacts.network, 'BNB Smart Chain');
-    expect(
-      MpcFacts.contractAddress.toLowerCase(),
-      '0x9135709be5eb0f7d6b777b8d53a27b07e7d6107f',
-    );
-    expect(MpcFacts.explorerBase, contains('bscscan'));
     expect(MpcFacts.infraStack.length, 4);
   });
 

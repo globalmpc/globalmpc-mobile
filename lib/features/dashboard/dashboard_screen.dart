@@ -4,10 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
 
+import '../../core/config/app_environment.dart';
 import '../../core/localization/locale_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/common_widgets.dart';
+import '../presale/presale_card.dart';
 import '../projects/projects_provider.dart';
+import '../registry/widgets/dashboard_registry_card.dart';
 import '../wallet/wallet_provider.dart';
 import 'widgets/dashboard_token_card.dart';
 import 'widgets/dashboard_balance_hero.dart';
@@ -111,6 +114,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         const SizedBox(height: 16),
                         const DashboardTokenHeroCard(),
+                        const SizedBox(height: 16),
+                        const DashboardRegistryCard(),
+                        if (AppEnvironment.current.hasPresale) ...[
+                          const SizedBox(height: 16),
+                          PresaleCard(url: AppEnvironment.current.presaleUrl!),
+                        ],
                         const SizedBox(height: 16),
                         SectionHeader(context.tr('dash.howItWorks')),
                         const SizedBox(height: 12),

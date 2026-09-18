@@ -17,6 +17,9 @@ class SendReviewStep extends StatelessWidget {
     required this.recipientAddress,
     required this.bnbBalance,
     required this.networkFee,
+    required this.feeUnavailable,
+    required this.networkLabel,
+    required this.onRetryFee,
     required this.onConfirm,
     required this.onEdit,
   });
@@ -24,14 +27,22 @@ class SendReviewStep extends StatelessWidget {
   final double amount;
   final String recipientAddress;
   final double bnbBalance;
-  final double networkFee;
+
+  /// Estimated fee in BNB, or null while the estimate is still loading.
+  final double? networkFee;
+
+  /// True when the node could not price the transfer; the user can retry.
+  final bool feeUnavailable;
+  final String networkLabel;
+  final VoidCallback onRetryFee;
   final VoidCallback onConfirm;
   final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
-    final hasEnoughBnb = bnbBalance >= networkFee;
+    final fee = networkFee;
+    final hasEnoughBnb = fee == null || bnbBalance >= fee;
 
     return ListView(
       padding: const EdgeInsets.only(top: 8),
@@ -75,7 +86,7 @@ class SendReviewStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        const Center(child: Pill('BNB Smart Chain', color: AppColors.info)),
+        Center(child: Pill(networkLabel, color: AppColors.info)),
         const SizedBox(height: 28),
         GlassCard(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -85,9 +96,11 @@ class SendReviewStep extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 child: Row(
                   children: [
-                    Text(
-                      context.tr('send.review.to'),
-                      style: TextStyle(color: p.textLo, fontSize: 14),
+                    Flexible(
+                      child: Text(
+                        context.tr('send.review.to'),
+                        style: TextStyle(color: p.textLo, fontSize: 14),
+                      ),
                     ),
                     const SizedBox(width: 18),
                     Expanded(
@@ -141,37 +154,7 @@ class SendReviewStep extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Flexible(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            context
-                                .tr('send.review.feeValue')
-                                .replaceFirst(
-                                  '{fee}',
-                                  networkFee.toStringAsFixed(5),
-                                ),
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          if (!hasEnoughBnb) ...[
-                            const SizedBox(height: 3),
-                            Text(
-                              context.tr('send.review.notEnoughBnb'),
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: AppColors.warning,
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
+                    Flexible(child: _feeValue(context, fee, hasEnoughBnb)),
                   ],
                 ),
               ),
@@ -189,7 +172,7 @@ class SendReviewStep extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         FilledButton(
-          onPressed: onConfirm,
+          onPressed: fee == null ? null : onConfirm,
           style: FilledButton.styleFrom(
             minimumSize: const Size(double.infinity, 52),
             foregroundColor: context.palette.textHi,
@@ -219,6 +202,84 @@ class SendReviewStep extends StatelessWidget {
           ),
           child: Text(context.tr('send.review.edit')),
         ),
+      ],
+    );
+  }
+
+  Widget _feeValue(BuildContext context, double? fee, bool hasEnoughBnb) {
+    final p = context.palette;
+    if (feeUnavailable) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            context.tr('send.review.feeUnavailable'),
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              color: AppColors.warning,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          TextButton(
+            onPressed: onRetryFee,
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              foregroundColor: AppColors.copper,
+              textStyle: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            child: Text(context.tr('send.review.feeRetry')),
+          ),
+        ],
+      );
+    }
+    if (fee == null) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(strokeWidth: 2, color: p.textLo),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              context.tr('send.review.estimating'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: p.textLo, fontSize: 14),
+            ),
+          ),
+        ],
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          context
+              .tr('send.review.feeValue')
+              .replaceFirst('{fee}', fee.toStringAsFixed(5)),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+        ),
+        if (!hasEnoughBnb) ...[
+          const SizedBox(height: 3),
+          Text(
+            context.tr('send.review.notEnoughBnb'),
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              color: AppColors.warning,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ],
     );
   }

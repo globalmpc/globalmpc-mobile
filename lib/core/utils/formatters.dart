@@ -22,7 +22,7 @@ class Fmt {
   static String percent(double fraction, {int decimals = 0}) =>
       '${(fraction * 100).toStringAsFixed(decimals)}%';
 
-  /// 0x9135709be5eB0f7d6B777b8d53a27B07e7d6107F -> "0x9135…107F"
+  /// 0x1234567890abcdef1234567890abcdef12345678 -> "0x1234…5678"
   static String shortAddress(String address, {int lead = 6, int tail = 4}) {
     if (address.length <= lead + tail + 1) return address;
     return '${address.substring(0, lead)}…${address.substring(address.length - tail)}';

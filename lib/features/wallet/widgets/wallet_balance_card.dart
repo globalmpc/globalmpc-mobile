@@ -28,15 +28,19 @@ class WalletBalanceCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(
-                  'TOTAL BALANCE',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: context.palette.textLo,
+                Expanded(
+                  child: Text(
+                    'TOTAL BALANCE',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: context.palette.textLo,
+                    ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,

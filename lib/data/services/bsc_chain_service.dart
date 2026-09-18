@@ -14,12 +14,25 @@ class InsufficientGasException implements Exception {
   final double availableBnb;
 }
 
+/// Gas cost of a transfer as the node priced it at estimation time. The
+/// final fee is settled by the chain; this is what the review screen shows
+/// and what the pre-sign balance check uses.
+class FeeEstimate {
+  const FeeEstimate({required this.gasLimit, required this.gasPriceWei});
+
+  final BigInt gasLimit;
+  final BigInt gasPriceWei;
+
+  BigInt get feeWei => gasLimit * gasPriceWei;
+  double get feeBnb => BscChainService._toEth(feeWei);
+}
+
 /// Read/send access to the configured BSC network. Holds no keys: signing
 /// credentials are passed in per call and only signed transactions leave
 /// this class (spec T16).
 class BscChainService {
-  BscChainService(this.config)
-    : _client = Web3Client(config.rpcUrl, http.Client());
+  BscChainService(this.config, {http.Client? client})
+    : _client = Web3Client(config.rpcUrl, client ?? http.Client());
 
   static const _erc20Abi = '''
 [
@@ -51,7 +64,7 @@ class BscChainService {
     return _toEth(amount.getInWei);
   }
 
-  /// MPC balance of [address]; 0 when no test token is configured yet.
+  /// MPC balance of [address]; 0 when this build has no token configured.
   Future<double> mpcBalance(String address) async {
     final token = _token;
     if (token == null) return 0;
@@ -63,6 +76,40 @@ class BscChainService {
     return _toEth(result.first as BigInt);
   }
 
+  Transaction _transfer(DeployedContract token, String to, double amountMpc) =>
+      Transaction.callContract(
+        contract: token,
+        function: token.function('transfer'),
+        parameters: [EthereumAddress.fromHex(to), _toWei(amountMpc)],
+      );
+
+  /// Prices the transfer with the node before anything is signed, so the
+  /// review screen shows the fee the chain will actually charge rather than a
+  /// constant.
+  Future<FeeEstimate> estimateTransferFee({
+    required String from,
+    required String to,
+    required double amountMpc,
+  }) async {
+    final token = _token;
+    if (token == null) {
+      throw StateError('No token configured for ${config.networkLabel}');
+    }
+    final transfer = _transfer(token, to, amountMpc);
+    final results = await Future.wait<Object>([
+      _client.estimateGas(
+        sender: EthereumAddress.fromHex(from),
+        to: transfer.to,
+        data: transfer.data,
+      ),
+      _client.getGasPrice(),
+    ]);
+    return FeeEstimate(
+      gasLimit: results[0] as BigInt,
+      gasPriceWei: (results[1] as EtherAmount).getInWei,
+    );
+  }
+
   /// Signs an MPC transfer locally and broadcasts it. Verifies gas funds
   /// first so failures are explained before anything is signed.
   Future<String> sendMpc({
@@ -72,50 +119,61 @@ class BscChainService {
   }) async {
     final token = _token;
     if (token == null) {
-      throw StateError('No test token configured for ${config.networkLabel}');
+      throw StateError('No token configured for ${config.networkLabel}');
     }
 
     final sender = credentials.address;
-    final gasPrice = await _client.getGasPrice();
-    final transfer = Transaction.callContract(
-      contract: token,
-      function: token.function('transfer'),
-      parameters: [EthereumAddress.fromHex(to), _toWei(amountMpc)],
+    final estimate = await estimateTransferFee(
+      from: sender.hexEip55,
+      to: to,
+      amountMpc: amountMpc,
     );
-
-    final gasEstimate = await _client.estimateGas(
-      sender: sender,
-      to: transfer.to,
-      data: transfer.data,
-    );
-    final feeWei = gasEstimate * gasPrice.getInWei;
     final balanceWei = (await _client.getBalance(sender)).getInWei;
-    if (balanceWei < feeWei) {
-      throw InsufficientGasException(_toEth(feeWei), _toEth(balanceWei));
+    if (balanceWei < estimate.feeWei) {
+      throw InsufficientGasException(estimate.feeBnb, _toEth(balanceWei));
     }
 
     return _client.sendTransaction(
       credentials,
-      transfer,
+      _transfer(token, to, amountMpc),
       chainId: config.chainId,
     );
   }
 
-  /// How far back a history query reaches. Public RPC providers reject or
-  /// truncate unbounded `eth_getLogs` scans, so the range is explicit rather
-  /// than left to default to genesis; on BSC's ~3s blocks this is roughly the
-  /// last three days.
-  static const int historyBlockWindow = 80000;
+  /// Polls for the receipt of [hash] until it lands or [timeout] passes.
+  /// Returns [TxStatus.pending] on timeout: the transaction may still be
+  /// mined later, so the caller must not present it as failed.
+  Future<TxStatus> waitForReceipt(
+    String hash, {
+    Duration timeout = const Duration(seconds: 90),
+    Duration interval = const Duration(seconds: 3),
+  }) async {
+    final deadline = DateTime.now().add(timeout);
+    while (true) {
+      TransactionReceipt? receipt;
+      try {
+        receipt = await _client.getTransactionReceipt(hash);
+      } catch (_) {
+        // A transient RPC failure is not a verdict on the transaction.
+      }
+      if (receipt != null) {
+        return receipt.status == true ? TxStatus.confirmed : TxStatus.failed;
+      }
+      if (DateTime.now().isAfter(deadline)) return TxStatus.pending;
+      await Future<void>.delayed(interval);
+    }
+  }
 
   /// Recent MPC Transfer history for [address], newest first, capped at
-  /// [limit]. Best-effort: public RPC log limits or outages degrade to an
-  /// empty list rather than breaking the wallet screen.
-  Future<List<WalletTransaction>> recentTransfers(
+  /// [limit]. When the provider rejects the log query or is unreachable the
+  /// result is marked unavailable rather than returned as an empty history,
+  /// so the wallet can say so instead of showing "no transactions".
+  Future<TransferHistory> recentTransfers(
     String address, {
     int limit = 10,
   }) async {
     final token = _token;
-    if (token == null) return const [];
+    if (token == null) return TransferHistory.empty;
     try {
       final transferEvent = token.event('Transfer');
       final topic0 = bytesToHex(
@@ -127,9 +185,8 @@ class BscChainService {
           '0x${address.substring(2).toLowerCase().padLeft(64, '0')}';
 
       final head = await _client.getBlockNumber();
-      final from = BlockNum.exact(
-        head > historyBlockWindow ? head - historyBlockWindow : 0,
-      );
+      final window = config.historyBlockWindow;
+      final from = BlockNum.exact(head > window ? head - window : 0);
       final to = BlockNum.exact(head);
 
       final results = await Future.wait([
@@ -183,7 +240,7 @@ class BscChainService {
         page.map((log) => log.blockNum).whereType<int>().toSet(),
       );
 
-      return [
+      return TransferHistory([
         for (final log in page)
           _toTransaction(
             log: log,
@@ -191,9 +248,9 @@ class BscChainService {
             address: address,
             timestamp: timestamps[log.blockNum],
           ),
-      ];
+      ]);
     } catch (_) {
-      return const [];
+      return TransferHistory.failed;
     }
   }
 

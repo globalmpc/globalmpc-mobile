@@ -155,14 +155,16 @@ class SettingRow extends StatelessWidget {
   const SettingRow({
     super.key,
     required this.label,
-    required this.onTap,
+    this.onTap,
     this.value,
     this.trailing,
   });
 
   final String label;
   final String? value;
-  final VoidCallback onTap;
+
+  /// Null renders a plain informational row with no tap affordance.
+  final VoidCallback? onTap;
   final Widget? trailing;
 
   @override
@@ -170,29 +172,42 @@ class SettingRow extends StatelessWidget {
     final p = context.palette;
     return InkWell(
       onTap: onTap,
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: p.textHi,
+      child: LayoutBuilder(
+        builder: (context, constraints) => Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: p.textHi,
+                ),
               ),
             ),
-          ),
-          if (value != null) ...[
-            Text(value!, style: TextStyle(fontSize: 11, color: p.textLo)),
-            const SizedBox(width: 4),
-          ],
-          trailing ??
-              SvgPicture.asset(
-                'assets/icons/wallet/arrow-right.svg',
-                width: 16,
-                height: 16,
+            if (value != null) ...[
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: constraints.maxWidth * 0.55,
+                ),
+                child: Text(
+                  value!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(fontSize: 11, color: p.textLo),
+                ),
               ),
-        ],
+              const SizedBox(width: 4),
+            ],
+            trailing ??
+                SvgPicture.asset(
+                  'assets/icons/wallet/arrow-right.svg',
+                  width: 16,
+                  height: 16,
+                ),
+          ],
+        ),
       ),
     );
   }

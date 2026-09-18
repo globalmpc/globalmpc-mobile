@@ -1,3 +1,4 @@
+import '../../core/config/app_environment.dart';
 import '../../core/constants/mpc_facts.dart';
 import '../../core/widgets/mining_hero_art.dart';
 import '../models/mining_project.dart';
@@ -77,7 +78,7 @@ class MockMpcRepository implements MpcRepository {
     isDemo: true,
     mpcBalance: 128450.0,
     bnbBalance: _previewLowGas ? 0.00003 : 0.0128,
-    network: MpcFacts.network,
+    network: AppEnvironment.current.chain.networkLabel,
     allocations: {'tsagaan-tolgoi': 96000.0},
     transactions: [
       WalletTransaction(

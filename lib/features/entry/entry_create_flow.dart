@@ -267,6 +267,8 @@ class _CreateWalletFlowState extends State<CreateWalletFlow> {
       return;
     }
     if (_step == 5) {
+      final biometrics = await _proveBiometrics();
+      if (!mounted) return;
       setState(() => _saving = true);
       try {
         await WalletSessionStore.instance.saveWalletSecrets(
@@ -275,9 +277,7 @@ class _CreateWalletFlowState extends State<CreateWalletFlow> {
         );
         await WalletSessionStore.instance.configure(
           pin: _pinController.text,
-          biometrics:
-              _biometrics &&
-              _biometricAvailability == BiometricAvailability.ready,
+          biometrics: biometrics,
         );
 
         WalletLockController.instance.markWalletCreated();
@@ -331,6 +331,35 @@ class _CreateWalletFlowState extends State<CreateWalletFlow> {
     );
     if (proceed != true) return;
     await SharePlus.instance.share(ShareParams(text: _mnemonic));
+  }
+
+  /// Biometric unlock is only stored as on after one successful prompt, so
+  /// the system permission is asked for here, where the user just chose it,
+  /// rather than at the first unlock. Anything short of success leaves it
+  /// off and says so; the wallet is still created.
+  Future<bool> _proveBiometrics() async {
+    if (!_biometrics ||
+        _biometricAvailability != BiometricAvailability.ready) {
+      return false;
+    }
+    final result = await WalletLockController.instance.runSystemPrompt(
+      () => BiometricAuth().authenticate(
+        reason: context.tr('settings.bio.authReason'),
+      ),
+    );
+    if (!mounted) return false;
+    if (result == BiometricResult.success) return true;
+    final messageKey = biometricMessageKey(result);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            context.tr(messageKey ?? 'wallet.create.biometric.skipped'),
+          ),
+        ),
+      );
+    return false;
   }
 
   void _back() {

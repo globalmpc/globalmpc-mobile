@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/config/app_environment.dart';
 import '../../../core/constants/mpc_facts.dart';
 import '../../../core/localization/locale_controller.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_icons.dart';
-import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../data/models/mining_project.dart';
-import '../../web/web_view_screen.dart';
 
 class ProjectVerificationCard extends StatelessWidget {
   const ProjectVerificationCard({super.key, required this.methods});
@@ -271,12 +270,10 @@ class ProjectContractCard extends StatelessWidget {
             MpcFacts.tokenStandard,
           ),
           Divider(color: p.border, height: 20),
-          _row(context, context.tr('dash.network'), MpcFacts.network),
-          Divider(color: p.border, height: 20),
           _row(
             context,
-            context.tr('dash.contract'),
-            Fmt.shortAddress(MpcFacts.contractAddress),
+            context.tr('dash.network'),
+            AppEnvironment.current.chain.networkLabel,
           ),
         ],
       ),
@@ -286,10 +283,24 @@ class ProjectContractCard extends StatelessWidget {
   Widget _row(BuildContext context, String label, String value) {
     final p = context.palette;
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: p.textLo)),
-        const Spacer(),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+        Flexible(
+          flex: 3,
+          child: Text(label, style: TextStyle(color: p.textLo)),
+        ),
+        const SizedBox(width: 12),
+        Flexible(
+          flex: 2,
+          child: Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.right,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ),
       ],
     );
   }
@@ -315,13 +326,7 @@ class ProjectCtaButtons extends StatelessWidget {
           width: double.infinity,
           height: 52,
           child: OutlinedButton(
-            onPressed: () => context.push(
-              '/webview',
-              extra: WebViewArgs(
-                url: MpcFacts.explorerTokenUrl,
-                title: context.tr('proj.viewExplorer'),
-              ),
-            ),
+            onPressed: () => context.push('/registry'),
             style: OutlinedButton.styleFrom(
               foregroundColor: context.palette.textHi,
               side: const BorderSide(color: AppColors.gold),
@@ -342,7 +347,7 @@ class ProjectCtaButtons extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  context.tr('proj.viewExplorer'),
+                  context.tr('registry.open'),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

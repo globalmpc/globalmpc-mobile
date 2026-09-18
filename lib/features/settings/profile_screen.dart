@@ -3,9 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/constants/mpc_facts.dart';
+import '../../core/config/app_environment.dart';
 import '../../core/localization/locale_controller.dart';
-import '../../data/services/bsc_chain_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_icons.dart';
 import '../../core/utils/formatters.dart';
@@ -101,14 +100,15 @@ class ProfileScreen extends StatelessWidget {
     String address, {
     required bool isDemo,
   }) {
-    // A real wallet lives on the configured chain (testnet today), so its
-    // explorer must match — mainnet BscScan would show an empty address.
-    final url = isDemo
-        ? '${MpcFacts.explorerBase}/address/$address'
-        : context.read<BscChainService>().config.explorerAddressUrl(address);
+    // The explorer must match the chain the wallet actually lives on, or the
+    // address page comes up empty.
+    final chain = AppEnvironment.current.chain;
     context.push(
       '/webview',
-      extra: WebViewArgs(url: url, title: MpcFacts.networkShort),
+      extra: WebViewArgs(
+        url: chain.explorerAddressUrl(address),
+        title: chain.networkShort,
+      ),
     );
   }
 }
@@ -163,7 +163,7 @@ class _WalletIdentityCard extends StatelessWidget {
                   color: AppColors.warning,
                   icon: AppIcons.info_outline,
                 )
-              else
+              else if (!AppEnvironment.current.chain.isMainnet)
                 Pill(
                   context.tr('dash.testnet'),
                   color: AppColors.warning,
